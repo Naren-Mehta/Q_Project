@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- <include resource="org/springframework/boot/logging/logback/base.xml" /> -->
+    
+        <logger name="com.wm.brta" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE" />
+        </logger>
+        <logger name="com.wm.brta" level="ERROR" additivity="false">
+            <appender-ref ref="CONSOLE" />
+        </logger>
+    
+    <springProfile name="production">
+    <logger name="com.wm.brta" level="WARN" additivity="false">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.wm.brta" level="ERROR" additivity="false">
+            <appender-ref ref="FILE" />
+        </logger>
+    </springProfile>
+   <!--  <if condition='property("spring.profiles.active").contains("dev")'>
+        <then>
+            <logger name="com.wm.brta" level="DEBUG" additivity="false">
+                <appender-ref ref="CONSOLE" />
+            </logger>
+        </then>
+        <else>
+            <logger name="com.wm.brta" level="WARN" additivity="false">
+                <appender-ref ref="FILE" />
+            </logger>
+        </else>
+    </if> -->
+</configuration>

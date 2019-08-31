@@ -1,0 +1,451 @@
+ <style type="text/css">
+ 	.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #7AB708;
+	}
+	.dataTables_wrapper .dataTables_paginate {   
+	    margin-top: 3%;
+	}
+	
+table.dataTable tbody td {
+    padding: 15px 10px ;
+
+}
+.custom_table th {
+	line-height: 1%;
+}
+</style> 
+
+<div class="background-static"></div>
+<div class="ContentMainContainer containerHomeHeader" style="position: fixed; width: 100%;    z-index: 1;" >
+	<h3 class="containerHomeHeaderheadings">
+
+		<a  ng-click="redirect()" class="HomeIconForStore"><i class="fa fa-home" aria-hidden="true" style="margin-left: 7%;"></i></a>
+	</h3>
+	<h4 class="containerHomeHeaderheadings containerHomeHeaderheadingsFont"><a  ng-click="redirect()" class="HomeIconForStore">Home</a>&nbsp;&nbsp;></h4>
+
+	<h5 class="containerHomeHeaderheadings containerMiniHeaderheadingsFont">User Management </h5>
+	<h5 class="containerHomeHeaderheadings"></h5>
+
+</div>
+<!-- <br><br><br>// commented by me on 27/02/2019 -->
+<div class="ContentMainContainer">
+
+
+
+	<div class="custom_tab">	
+		<div class="tab_heading">
+			<ul >
+			<li class="active">
+					<a href tabindex="3" class="userTabsIndex">User Management</a>
+			</li>
+			
+		</ul>		
+		</div>
+		
+		
+		
+		
+		<div class="containerNotRequired">
+			<div class="tab_panelNotRequired">
+			<div class="filter-frequency">
+				<div class="filter-block1">
+
+					<div class="form-field mr10 dropDownWidthIn" style="width: 21%;">
+						<label class="select_label"><span>Supplier</span></label>
+						 <select tabindex="4" class="select-field h56 userTabsIndex"  ng-model="supplierFilter" ng-disabled="isSupplierRole"
+                          ng-options="supplier.supplierId as supplier.description for supplier in suppliers | orderBy:'description'" style="    padding: 2.2%;"> 
+                        <option value="">Please select</option> 
+                        <option ng-repeat = "supplier in suppliers">{{supplier.description}}</option>
+					</select>
+					</div>
+
+					 <div class="form-field mr10 dropDownWidthIn">
+							<label class="select_label"><span>Status</span></label>
+							<select class="select-field h56 userTabsIndex" ng-model = "statusFilter" tabindex="5" >
+							<option value="" selected="selected">Please Select</option>
+								 <option >Active</option>
+								 <option>Inactive</option>
+							</select>
+					 </div>
+
+					  <div  class="spinner-overlay" ng-show="loaderUserManagement" style="padding-bottom:20px">  
+                   	  <div class="loader-inner"> <i  class="fa fa-spin fa-circle-o-notch"></i> Loading ... </div></div>
+					 
+					 <div class="form-field mr10 submiticon">
+						<button tabindex="6" class="btn btn-field btn-green iconcolor userTabsIndex" title="Go" ng-click="getFilteredData();removeInputUserValue()" ng-keydown="$event.keyCode === 13 " data-toggle="tooltip"  >
+						<!-- <i class="fa fa-angle-right"></i> -->Submit
+						</button>
+					 </div>
+
+					 <div class="form-field mr10 submiticon refreshButtonAlign" >
+						<img  src="/brta/app/ui/resources/images/refresh.png"  title="Reset" tabindex="7"  ng-click="resetFilteredData()" ng-keydown="$event.keyCode === 13 && resetFilteredData()" style="height: 94%;" class="refreshTooltip userTabsIndex" data-toggle="tooltip" >
+						<!-- <i class="fa fa-angle-right"></i> -->
+						
+					 </div>
+					  <div class="form-field mr0 pull-right" style="margin-top: 3%;">
+							
+							<a class="reportwith" ng-click="downloadUserPdf()" ng-keydown="$event.keyCode === 13 && downloadUserPdf()" title="Download Pdf" >
+								<img src="/brta/app/ui/resources/images/new_pdf.png" title="Download Pdf" tabindex="8" class="pdfTooltip userTabsIndex" data-toggle="tooltip" >
+							</a> 
+							 <a excel-export export-data="exportUserData" file-name="{{userfileName}}" class="reportwith userTabsIndex" tabindex="9"  class="form-btn " id="usermanagementExcelData"  ng-if="(exportUserData!=undefined && exportUserData.length>0)" ng-keydown="$event.keyCode === 13 && executeExcel_user()"></a>
+
+							 <span title="Download Excel" data-toggle="tooltip">
+							<a class="reportwith userTabsIndex" tabindex="9"   ng-if="!(exportUserData!=undefined && exportUserData.length>0)" class="form-btn"   >
+								<img src="/brta/app/ui/resources/images/new_excel.png"  >
+							</a>
+						</span>
+							<!-- <span title="Download Excel" data-toggle="tooltip">
+							<a class="reportwith" tabindex="9" ng-if="(jsonForUserManagementExport!=undefined && jsonForUserManagementExport.length>0)" class="form-btn"   ng-csv="jsonForUserManagementExport" 
+								csv-header="['Last Name','First Name','Email Address','Supplier Name','Role','Mobile','Status']"  filename="UserManagement.csv" ng-keydown="$event.keyCode === 13 && executeExcel_user()" id="usermanagementExcelData">
+								<img src="/brta/app/ui/resources/images/new_excel.png" >
+							</a>
+							</span>
+							<span title="Download Excel" data-toggle="tooltip">
+							<a class="reportwith" tabindex="9"   ng-if="!(jsonForUserManagementExport!=undefined && jsonForUserManagementExport.length>0)" class="form-btn"   >
+								<img src="/brta/app/ui/resources/images/new_excel.png"  >
+							</a>
+						</span> -->
+						</div> 
+				</div>
+			</div>
+				<div class="filter-block">
+
+					<div class="form-inline">
+
+					<button type="button" class="btn btn_green userTabsIndex" ng-click = "addDriverSupplierUserMgmt();addTabIndexToPopup();removeTabIndex()" tabindex="10" title="Add" data-toggle="tooltip"   ><i class="fa fa-plus" aria-hidden="true" ></i>{{getUserType()}}</button>
+					
+						<span style="color: red">{{uploadExcelMessage}}</span>
+
+					</div>
+				</div>
+
+				<div class="custom_table scroll-table table-scroll" ng-if="authorizedUserMgmt">
+					<table id="userManagementTable"  dt-instance="dtInstance" 
+						datatable="" dt-options="dtOptions"  dt-columns="dtColumnsUsermgmt" class="datatable resource-table" cellspacing="0" width="100%" style="margin-top: 0px; margin-bottom: 0px;">
+						</table>
+					</div>	
+					<div class="custom_table incpic scroll-table table-scroll table-responsive" ng-if="!authorizedUserMgmt">
+			
+					<table id="userManagementemptyTable"  datatable=""  dt-options="dtOptionsemptyBalePickup"
+						class="datatable resource-table" cellspacing="0" width="100%" ng-init="addTabIndex()">
+						<thead>
+							<tr>
+								<th>Last Name</th>
+								<th>First Name </th>
+								<th>Email Address</th>
+								<th>Supplier Name</th>
+								<th>Role</th>
+								<th>Mobile</th>
+								<th>Status</th>
+								<th>Edit</th>
+								
+							</tr>
+						</thead>
+
+					
+					</table>
+
+
+				</div>		
+
+
+					
+			</div>
+		
+		
+		<!--popup usermanagement-->
+		
+			<div class="set-data-popup popup_overlay fadein"
+			ng-show="addEditUserPopup===true">
+
+			<div class="popup_content setdata-scroll" style="height:auto;width:60%">
+				<div class="popup-header">
+					<button type="button" class="close close_Button"
+						ng-click="userMgmtPopupClose();assignTabIndexclose();assignbackIndexValue()" >
+						<img src="/brta/app/ui/resources/images/close_btn.png" tabindex="40">
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						<b>{{isEdit?"Edit":"Add"}} Driver{{isSupplierRole ? "" : "/Supplier"}}</b>
+						<span
+													ng-if="!userDuplicate"
+													ng-show="userMgmtData.error.duplicate"
+													style="color: red;">User already associated with below email,phone number and supplier.Please change email or phone number or supplier. </span>
+					</h4>
+					<div class="alert" ng-show="errorFlag">Please provide a Store
+						Start Date</div>
+				</div>
+				<div class="popup-body ">
+					<div class="scroll-popup">
+						<div class="container containerWithoudPadding " tabindex="">
+							<div class=" popupHeaderDate popupLayerWithoutPadding col-md-12 col-md-lg-12 ">
+								<div class="popup-layer col-md-6 col-lg-6"
+									style="padding: 0px 15px; border-bottom: 1px solid #cccccc;">
+									<div class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Last Name*</b><span
+													ng-if="!userMgmtData.userLastName"
+													ng-show="userMgmtData.error.userLastNameError"
+													style="color: red;">Last Name is mandatory. </span>
+											</h5>
+											<div class=" commentAlignment">
+
+												<input type="text" id="lastName" limit-to="30" maxlength="30"
+													class="form-control addDriverIndexValue4 Inputwidth input-field bordercolorG  ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched "
+													 ng-pattern-restrict="^[A-Za-z ]*$"
+													ng-model="userMgmtData.userLastName" placeholder="Last Name" autofocus>
+											</div>
+									</div>
+								</div>
+							</div>
+							<div class="popup-layer col-md-6 col-lg-6"
+									style="padding: 0px 15px; border-bottom: 1px solid #cccccc;">
+									<div class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>First Name*</b> <span ng-if="!userMgmtData.userFirstName"
+													ng-show="userMgmtData.error.userFirstNameError"
+													style="color: red;">First Name is mandatory. </span>
+											</h5>
+											<div class=" commentAlignment">
+
+												<input type="text" id="firstName" limit-to="30" maxlength="30"
+									class="form-control addDriverIndexValue4 Inputwidth input-field bordercolorG  ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched "
+													 ng-pattern-restrict="^[A-Za-z ]*$"
+													ng-model="userMgmtData.userFirstName" placeholder="First Name">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class=" popupHeaderDate popupLayerWithoutPadding col-md-12 col-md-lg-12 ">
+								<div class="popup-layer col-md-6 col-lg-6" style="padding: 0px 15px;">
+									<div class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Email Address*</b>
+												<span
+													ng-if="!userMgmtData.userEmailAddress"
+													ng-show="userMgmtData.error.userEmailAddressError"
+													style="color: red;">Email address is mandatory.
+												</span><span
+													ng-if="!userMgmtData.userEmailAddressFormar"
+													ng-show="userMgmtData.error.userEmailAddressFormatError"
+													style="color: red;">Invalid email format.Exp(xxx@yyy.com)
+												</span>
+											</h5>
+										<div class="commentAlignment">
+												<input type="text" id="emailAddress" 
+													class="addDriverIndexValue4 form-control Inputwidth input-field bordercolorG ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched "
+											
+													ng-model="userMgmtData.userEmailAddress" placeholder="Email Address">
+											</div>
+											
+										</div>
+									</div>
+								</div>
+								<div class="popup-layer col-md-6 col-lg-6"
+									style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Supplier Name*</b><span
+											ng-if="!userMgmtData.supplierName"
+											ng-show="userMgmtData.error.supplierName" 
+											style="color: red;"> Supplier Name is mandatory. </span> </b>
+																							
+											</h5>
+											
+											<div class="select-field serviceprovider-multifilter">
+												<ui-select ng-model="userMgmtData.supplierName" class="addDriverIndexValue4" 
+													ng-disabled="isSupplierRole" search-enabled="true"
+													theme="bootstrap">
+													
+													<ui-select-match placeholder="Select ">{{$select.selected.description}}</ui-select-match>
+												<ui-select-choices repeat="supplier in suppliers | orderBy : 'description' | filter:{description: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												
+												<div>{{supplier.description}}
+												</div>
+												<label for="supplier{{$index}}"></label> </ui-select-choices> </ui-select>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+						
+						
+						<div class="container containerWithoudPadding">
+							<div class="spinner-overlay" ng-show="loadertest"
+								style="padding-bottom: 20px">
+								<div class="loader-inner">
+									<i class="fa fa-spin fa-circle-o-notch"></i> Please wait...
+
+								</div>
+							</div>
+						</div>
+						<div class="popupHeaderDate popupLayerWithoutPadding col-md-12 col-md-lg-12"
+							style="border-bottom: 1px solid #DADCDD; padding-bottom: 0px;">
+								<div class="popup-layer col-md-6 col-lg-6" style="padding: 0px 15px;">
+									<h5 class="popUpHeadingh6">
+										<b>Role*</b><span
+											ng-if="!userMgmtData.driverSupplierRole"
+											ng-show="userMgmtData.error.driverSupplierRoleError" 
+											style="color: red;">User Role is mandatory. </span> </b>
+									</h5>
+									
+									<div class="select-field serviceprovider-multifilter">
+												<ui-select ng-model="userMgmtData.driverSupplierRole" class="addDriverIndexValue4" 
+													ng-disabled="isSupplierRole" search-enabled="true"
+													theme="bootstrap">
+													
+												<ui-select-match placeholder="Select ">{{$select.selected}}</ui-select-match>
+												<ui-select-choices repeat="driversupplierRole in driverSupplierRole" class="flexcroll" style=" width: 60% !important;">
+												
+												<div>{{driversupplierRole}}</div>
+												<label for="driversupplierRole{{$index}}"></label> </ui-select-choices> </ui-select>
+									</div>
+									
+								</div>
+							
+							
+								<div class="popup-layer col-md-6 col-lg-6"
+									style="padding: 0px 15px; border-bottom: 1px solid #FFFFFF">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Mobile Number*</b><span
+													ng-if="!userMgmtData.userMobileNumber"
+													ng-show="userMgmtData.error.userMobileNumberMandatoryError"
+													style="color: red;"> Mobile Number is mandatory. </span> 
+													<span
+													ng-if="!userMgmtData.materialPickedWeight"
+													ng-show="userMgmtData.error.userMobileNumberLengthError"
+													style="color: red;"> Mobile Number shouold be 10 digits.</span>
+											</h5>
+											<div class="commentAlignment">
+												<input only-numeric type="text" id="mobileNumber"
+													class="form-control addDriverIndexValue4 Inputwidth input-field bordercolorG"
+													maxlength="10" ng-model="userMgmtData.userMobileNumber"
+													placeholder="Mobile Number">
+											</div>
+										</div>
+									</div>
+								</div>
+							
+						</div>
+						
+
+						
+						<!--sTATUS fILETER-->
+						
+						<div class="popupHeaderDate popupLayerWithoutPadding col-md-12 col-md-lg-12 ">
+								<div class="popup-layer col-md-6 col-lg-6" style="padding: 0px 15px;">
+									<h5 class="popUpHeadingh6">
+										<b>Status*</b><span
+											ng-if="!userMgmtData.activeInactive"
+											ng-show="userMgmtData.error.activeInactiveError" 
+											style="color: red;"> Please select status. </span> </b>
+									</h5>
+									
+									<div class="select-field serviceprovider-multifilter">
+												<ui-select ng-model="userMgmtData.activeInactive" class="addDriverIndexValue4" 
+													 search-enabled="true"
+													theme="bootstrap">
+													
+												<ui-select-match placeholder="Select ">{{$select.selected}}</ui-select-match>
+												<ui-select-choices repeat="activeInactive in activeInactive" class="flexcroll" style=" width: 60% !important;">
+												
+												<div>{{activeInactive}}</div>
+												<label for="activeInactive{{$index}}"></label> </ui-select-choices> </ui-select>
+									</div>
+									
+								</div>
+								<div class="popup-layer col-md-6 col-lg-6" style="padding: 0px 15px;"></div></div>
+							
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer "
+									style="padding: 0px 15px; border-bottom: 1px solid #FFFFFF; margin-top: 8px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						
+						
+						
+						
+						
+
+						<div class="container containerWithoudPadding">
+						<div class="popup-footer">
+							<div class="popup-layer pull-left borderbottomremv"></div>
+						
+							<button type="button"
+								class="addDriverIndexValue5 btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom saveButtonAlign"
+								ng-click="addEditUserDetails(userMgmtData);assignTabIndexclose();assignbackIndexValue()">
+
+								Save</button>
+								
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+		
+		
+		
+		
+		</div>
+		</div>
+	</div>
+	</div>
+	
+	
+<script type="text/ng-template" id="warning-dialog.html">
+  <div class="modal-header">
+   <h3>Your session has been expired! Please login again.</h3>
+  </div>
+  <div idle-countdown="countdown" ng-init="countdown=5" class="modal-body">
+   <uib-progressbar max="5" value="5" animate="false" class="progress-striped active">You'll be logged out in {{countdown}} second(s).</uib-progressbar>
+  </div>
+
+</script>
+<script type="text/ng-template" id="timedout-dialog.html">
+  <div class="modal-header">
+   <h3>You've Timed Out! Please login again.</h3>
+  </div>
+  <div ng-if="!isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logout"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+
+ <div ng-if="isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logoutSupplier"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+ </script>
+ 
+ <script type="text/ng-template" id="unique-user-popup.html">
+  <div class="modal-header">
+   <h3>User already exist for the selected Supplier.</h3>
+  </div>
+  <div class="modal-body" style="text-align:center">
+   <a href="" ng-click="closeUserUniquePopup()"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+
+</script>

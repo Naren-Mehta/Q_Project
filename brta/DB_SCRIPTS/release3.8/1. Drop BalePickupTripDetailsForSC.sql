@@ -1,0 +1,3 @@
+Drop table  [dbo].[BalePickupTripDetailsForSC]
+
+

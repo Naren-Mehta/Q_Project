@@ -1,0 +1,1724 @@
+
+<script type="text/javascript">
+	
+</script>
+<style type="text/css">
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+	.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover
+	{
+	background: #7AB708;
+}
+.no-footer.dataTables_wrapper div.dataTables_scrollHead table, .no-footer.dataTables_wrapper div.dataTables_scrollBody table{
+	margin :0;
+}
+.dataTables_wrapper .dataTables_paginate {
+	margin-top: 3%;
+}
+
+.custom_table th {
+	line-height: 1%;
+}
+
+</style>
+
+<div class="background-static"></div>
+<div class="ContentMainContainer containerHomeHeader" style="position: fixed; width: 100%;    z-index: 1;">
+	<h3 class="containerHomeHeaderheadings">
+		<a ng-click="redirect()" class="HomeIconForStore"><i class="fa fa-home" aria-hidden="true" style="margin-left: 7%;"></i></a>
+	</h3>
+	<h4 class="containerHomeHeaderheadings containerHomeHeaderheadingsFont"><a ng-click="redirect()" class="HomeIconForStore" >Home</a>&nbsp;&nbsp;></h4>
+	<h5 class="containerHomeHeaderheadings containerMiniHeaderheadingsFont" >Store
+		Management</h5>
+	<!--  <h5 class="containerHomeHeaderheadings"> Store List View</h5> -->
+
+	<!-- <div class="storeManagementMain" ng-show="storeManagementList">
+		<i class="fa fa-search storeManagementSearch " aria-hidden="true"></i>
+		<input type="search" tabindex="2" ng-model="storeListSearch" ng-change="onChangeStoreList(storeListSearch)"
+			class="searchStoreManagement" title="Search By Customer, Store, Address, Data Status" ng-model-options='{ debounce: 1000 }'>
+	</div> -->
+	 <!-- <div class="storeManagementMain" ng-show="storeManagementSupplier">
+		<i class="fa fa-search storeManagementSearch " aria-hidden="true"></i>
+		<input type="search" tabindex="2" ng-model="storeSupplierListSearch"
+			class="searchStoreManagement"
+			title="Search By Customer Name, Store Name, Supplier Name, Sell Customer Site Name, Maaterial Profile" ng-change="onChangeSearchSupplier(storeSupplierListSearch)"  ng-model-options='{ debounce: 1000 }'>
+	</div> -->
+	<!--<div class="storeManagementMain" ng-show="storeManagementAssignments">
+		<i class="fa fa-search storeManagementSearch " aria-hidden="true"></i>
+		<input type="search" tabindex="2" ng-model="storeAssignmentsSearch" ng-change="onChangeSearch(storeAssignmentsSearch)"  ng-model-options='{ debounce: 1000 }'
+			class="searchStoreManagement"
+			title="Search By Customer, Store Name, Day Driver, Night Driver ">
+	</div> -->
+	<!-- <span class="searchText" ng-show="storeManagementSupplier">Search</span> -->
+</div>
+<!-- <br><br><br>// commented by me on 27/02/2019 -->
+<div class="ContentMainContainer">
+
+	<div class="custom_tab">
+		<div class="tab_heading">
+			<ul>
+				<li  ng-class="{active: $route.current.activetab == 'storeListView'}"><a tabindex="3" class="tabsIndexValue" href="#/storemanagement"
+					ng-click="storeListView=true;assignActivityTab=false;assignment=false;storeManagementListOpen()"
+					ng-show="user.role!='Supplier'">STORE LIST VIEW</a></li>
+						<!--First-->
+				<li   ng-class="{active: $route.current.activetab == 'assignActivityTab'}" ng-if="!isSupplierRole"><a tabindex="4" class="tabsIndexValue"  href="#/storesupplierlist" ng-click="assignActivityTab=true;storeListView=false;assignment=false;storeManagementSupplierOpen()">STORE SUPPLIER LIST </a></li>	<!--Second-->
+				<li   ng-class="{active: $route.current.activetab == 'assignActivityTab'}" ng-if="isSupplierRole"><a tabindex="4" class="tabsIndexValue"  href="#/storesupplierForSupplier" ng-click="assignActivityTab=true;storeListView=false;assignment=false;storeManagementSupplierOpen()">STORE SUPPLIER LIST</a></li>
+				<!--First-->
+				<li   ng-class="{active: $route.current.activetab == 'assignment'}" ng-if="!isSupplierRole"><a tabindex="5"  class="tabsIndexValue" href="#/assignments" ng-click="assignment=true;assignActivityTab=false;storeListView=false;">ASSIGNMENTS</a></li>
+				<!--Second-->
+				<li   ng-class="{active: $route.current.activetab == 'assignment'}" ng-if="isSupplierRole"><a tabindex="5"  class="tabsIndexValue" href="#/assignmentForSupplier" ng-click="assignment=true;assignActivityTab=false;storeListView=false; storeManagementAssignmentsOpen()">ASSIGNMENTS</a></li>
+			</ul>
+		</div>
+		<div class="containerNotRequired">
+			<div class="tab_panelNotRequired"  ng-show="!isSupplierRole && storeListView">
+				<div class="filter-frequency">
+					<div class="filter-block1">
+						<div class="form-field mr10 dropDownWidthOut">
+							<label class="select_label"><span>Customer</span></label> <select tabindex="6"
+								class="select-field h56 selectTabIndexValue" ng-model="buyCustomerSelected"
+								ng-change="getBuyCustomerDetails(buyCustomerSelected);"
+								ng-options="customer.customerName for customer in buyCustomers| orderBy:'customerName'"
+								style="width: 100%;">
+								<option value="">Please Select</option>
+							</select>
+						</div>
+
+
+						<div class="spinner-overlay" ng-show="loaderStoreListView"
+							style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+							</div>
+						</div>
+
+
+						<div class="form-field mr10 dropDownWidthIn">
+							<label class="select_label"><span> State</span></label> <select tabindex="7"
+								class="select-field h56 dropdownSelectWidthPadding selectTabIndexValue"
+								ng-model="statesInStoreList"
+								ng-options="state.lookupCode as state.description for state in lov_state">
+								<option value="">Please Select</option>
+							</select>
+
+						</div>
+
+						<div class="form-field mr10 dateDropdownIn">
+							<label class="select_label"><span>From*</span><span ng-if="invalidSLVFromDateError" style="color:red">{{invalidSLVFromDateError}}</span></label>
+							<div class="input-group date-field" ng-click="StartDateFun();startDateFun_tabindex()"  ng-keydown="$event.keyCode === 13 && StartDateFun();startDateFun_tabindex()">
+								<input ng-paste="$event.preventDefault()" id="startDateval_store" type="text" ng-model="startDate" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									class="selectTabIndexValue selectTabIndexValue1 selectedTabValue input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="StartDate.opened" ng-click="StartDateFun();startDateFun_tabindex()" 
+									 ng-change="checkStoreListViewBtn();dateValidation()" 
+									 ng-blur="checkValidDate();storeListStartFutureDate()"
+									 ng-keydown="$event.keyCode === 13 && StartDateFun();startDateFun_tabindex()"
+									show-button-bar="false"
+									datepicker-options="startDateOptionsStoreList"
+									close-text="Close" 									
+									 tabindex="8" > 									 <i 
+									class="dte-icon glyphicon glyphicon-calendar"
+									style="color: green; font-size: 25px;"></i> 
+							</div>
+						</div>
+
+
+						<div class="form-field mr10 dateDropdownIn">
+							<label class="select_label"><span>To*</span><span ng-if="invalidSLVToDateError" style="color:red">{{invalidSLVToDateError}}</span><span
+								ng-if="endDateErrorMessage" style="color: red;"> ( To
+									date should be greater than From date )</span></label>
+							<div class="selectTabIndexValue input-group date-field" ng-click="EndDateFun();" ng-keydown="$event.keyCode === 13 && EndDateFun();endDateFun_tabindex()">
+								<input ng-paste="$event.preventDefault()" id="endDateval_store" type="text" ng-model="endDate" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									class="selectTabIndexValue1 selectTabIndexValue2 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="EndDate.opened"
+									show-button-bar="false"									
+									datepicker-options="endDateOptionsStoreList" close-text="Close"
+									ng-click="EndDateFun();endDateFun_tabindex()"  ng-blur="checkValidDate();storeListSToFutureDate()"
+									ng-keydown="$event.keyCode === 13 && EndDateFun();endDateFun_tabindex()"
+									ng-change="checkStoreListViewBtn();dateValidation()" tabindex="9"> <i
+									class="date-icon glyphicon glyphicon-calendar"
+									style="color: green; font-size: 25px;" ></i>
+							</div>
+
+						</div>
+
+
+						<div class="spinner-overlay" ng-show="loaderStoreList"
+							style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+							</div>
+						</div>
+
+
+
+
+						<div class="form-field mr10 submiticon">
+							<button class="btn btn-field btn-green iconcolor selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2"
+								ng-click="getCustomerSites(buyCustomerSelected,statesInStoreList,startDate, endDate);removeInputValueStoreList()" ng-keydown="$event.keyCode === 13 "
+								ng-disabled="storeListViewBtn" title="Go" tabindex="10" data-toggle="tooltip"  >Submit</button>
+						</div>
+
+						<div class="form-field mr10 submiticon refreshButtonAlign" >
+							<img src="/brta/app/ui/resources/images/refresh.png" tabindex="11"
+								ng-click="refreshStoreList()" ng-keydown="$event.keyCode === 13 && refreshStoreList()" ng-disabled="storeListViewBtn"
+								title="Reset" style="height: 94%;" class="refreshTooltip selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2" data-toggle="tooltip" >
+							<!--<i class="fa fa-angle-right"></i>-->
+						</div>
+						<div class="form-field mr0 pull-right configurationButton">
+						
+							<button type="button" tabindex="-1" 
+								class="btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom setdataPopupAlignment topsetdata  selectTabIndexValue1 selectTabIndexValue2"
+								ng-click="setdataPopup();assignTabIndex();configuredata_tabindexvalue()" ng-disabled="setDataBtn" title="Configure Data" data-toggle="tooltip"  >
+								<!-- <img src="/brta/app/ui/resources/images/setfrequency.png" alt="wrong path" title="Set Data"> -->
+								CONFIGURE DATA 
+							</button>
+							 <a class="reportwith" ng-click="storeListPdf()"  ng-keydown="$event.keyCode === 13 && storeListPdf()" > <img 
+								src="/brta/app/ui/resources/images/new_pdf.png"
+								title="Download Pdf" class="pdfTooltip selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2" tabindex="12"  data-toggle="tooltip" >
+							</a>
+							<a excel-export export-data="exporStoreListData" file-name="{{storeListfileName}}"  class="form-btn reportwith selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2" id="storemanagementExcelData"  ng-if="exporStoreListData!=undefined && exporStoreListData.length>0"  ng-keydown="$event.keyCode === 13 && executeExcel_store()"></a>
+							<span title="Download Excel" data-toggle="tooltip">
+							<a   tabindex="13" class="reportwith form-btn selectTabIndexValueselectTabIndexValue1 selectTabIndexValue2" ng-if="!(exporStoreListData!=undefined && exporStoreListData.length>0)" 
+								 ng-click="clickOnUpload()"   ng-keydown="$event.keyCode === 13 && clickOnUpload()" > <img 	src="/brta/app/ui/resources/images/new_excel.png" >
+							</a> 
+						</span>
+
+							<!-- <span title="Download Excel" data-toggle="tooltip">
+							<a class="reportwith form-btn excelTooltip selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2"  ng-if="jsonForStoreListExport!=undefined && jsonForStoreListExport.length>0" 
+								title="Download Excel"  data-toggle="tooltip" ng-csv="jsonForStoreListExport"
+								csv-header="['Customer','Store','Address','Data Configuration']"
+								filename="StoreListView.csv"  ng-keydown="$event.keyCode === 13 && executeExcel_store()"
+								id="storemanagementExcelData"   tabindex="0" > 
+
+								<img src="/brta/app/ui/resources/images/new_excel.png"	 >
+							</a>
+							</span> 
+							<span title="Download Excel" data-toggle="tooltip">
+							<a   tabindex="13" class="reportwith form-btn selectTabIndexValueselectTabIndexValue1 selectTabIndexValue2" ng-if="!(jsonForStoreListExport!=undefined && jsonForStoreListExport.length>0)" 
+								 ng-click="clickOnUpload()"   ng-keydown="$event.keyCode === 13 && clickOnUpload()" > <img 	src="/brta/app/ui/resources/images/new_excel.png" >
+							</a> 
+						</span>-->
+						</div>
+
+					</div>
+
+				</div>
+
+				<div ng-show="showAddDataSuccessMessage"
+					style="color: green; text-align: center;">
+					<h5 style="margin-bottom: 0px;    font-weight: bolder;">Data was set successfully</h5>
+				</div>
+
+				<div ng-show="showAddFrequencySuccessMessage"
+					style="color: green; text-align: center;">
+					<h5 style="margin-bottom: 0px;    font-weight: bolder;">Frequency was set successfully</h5>
+				</div>
+
+
+
+				<div 
+					class="custom_table scroll-table table-scroll table-align-storelist table-align-storelist" ng-if="storeListViewValid"  style="padding-top: 0px;">
+					
+				<table id="storeListViewReacords" ng-init="updateSearchFilterSLV()"
+						datatable="" dt-options="dtOptionsSLV"
+						dt-columns="dtColumnsSLV" dt-instance="dtInstanceSLV"
+						class="datatable resource-table" cellspacing="0" width="100%">
+					</table>
+					
+						<button type="button" style="display: none;" id="triggerSLVSelect"
+							 ng-click="checkAll(dtInstanceSLV)" >TriggerSLP</button>
+					<button  type="button" 
+						class="btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom setdataPopupAlignment "
+						style="" ng-click="setdataPopup();assignTabIndex();configuredata_tabindexvalue()" ng-disabled="setDataBtn" tabindex="0" data-toggle="tooltip"  title="Configure Data">
+						<!-- <img src="/brta/app/ui/resources/images/setfrequency.png" alt="wrong path" title="Set Data"> -->
+						CONFIGURE DATA
+					</button>
+					
+					
+					</div>	
+					<div class="custom_table scroll-table table-scroll table-align-storelist table-align-storelist"  ng-if="!storeListViewValid">
+					
+					<table 
+						 ng-if="!storeListViewValid"  cellspacing="0" width="100%">
+						<thead>
+							<tr class="table_form form-field nowrap">
+
+								<th class="tr_width">
+									<div class="custom-check checkboxMarginremv">
+										<input type="checkbox" id="selectall" class="checkboxTabindex selectTabIndexValue1" tabindex="0"
+											ng-disabled="storeListCheckAllBtn"
+											ng-model="modeltemp.selectall" ng-change="checkAll()">
+										<label for="selectall" class="selctall_label"><div
+												class="select"></div></label>
+									</div> <span class="selectCheckBoxAlign">Select</span>
+								</th>
+								<th class="tr_width">Customer</th>
+								<th class="tr_width">Store</th>
+								<th class="tr_width">Address</th>
+								<th class="tr_width">Data Configuration</th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+					
+
+				
+
+
+
+			</div>
+
+
+			<div class="tab_panelNotRequired" ng-show="assignActivityTab" 
+				style="padding-bottom: 20px">
+
+				<div class="filter-frequency" >
+					<div class="filter-block1">
+
+						<div class="form-field mr10 dropDownWidthOut" style="width: 25%">
+							<label class="select_label "><span> Customer</span></label> <select tabindex="6"
+								class="select-field h56 selectTabIndexValue"
+								ng-model="storeSupplierCustomerSelected" ng-change="getFilteredValuesSSL(storeSupplierCustomerSelected,supplierSelectedAct)" style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="customer in buyCustomers | orderBy: 'customerName'" value='{{customer}}'>{{customer.customerName}}</option>
+							</select>
+							
+							
+							
+						</div>
+						<div class="spinner-overlay" ng-show="loaderStoreSupplierList"
+							loaderAssignActivity style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+							</div>
+						</div>
+
+						
+						<div class="form-field mr10 dropDownWidthOut" style="width: 25%">
+							<label class="select_label"><span> Supplier</span></label> </span> <select tabindex="7"
+								class="select-field h56 selectTabIndexValue" ng-model="supplierSelectedAct"
+								ng-change="getFilteredValuesSSL(storeSupplierCustomerSelected,supplierSelectedAct)"
+								ng-disabled="isSupplierRole"
+								style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="supplier in suppliersForCustomerSelected | orderBy: 'description'" value='{{supplier}}'>{{supplier.description}}</option>
+							</select>
+						</div>
+
+						<div class="form-field mr10 dropDownWidthOut" style="width: 20%">
+							<label class="select_label "><span> State</span></label> <select tabindex="8"
+								class="select-field h56 selectTabIndexValue" ng-model="state"
+								ng-options="state.lookupCode as state.description for state in lov_state">
+								<option value="">Please Select</option>
+							</select>
+
+						</div>
+							</div>
+							<div class="filter-block1">
+
+						<div class="form-field mr10 dateDropdownIn" >
+							<label class="select_label"><span>From</span><span ng-if="invalidSSLFromDateError" style="color:red">{{invalidSSLFromDateError}}</span></label>
+							<div class="input-group date-field" ng-click="StartupDateFun();StartupDateFun_tabindexValue()">
+					<input tabindex="9" id="startDateSSL_storelist" ng-paste="$event.preventDefault()" type="text" ng-model="startDateSSL" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									class="selectTabIndexValue selectedtab-storeList selectedtab-storeList1-value input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched assigningStartDate"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="StartupDate.opened"
+									show-button-bar="false"
+									datepicker-options="startDateOptionsStoreSupplierList"
+									close-text="Close" ng-click="StartupDateFun();StartupDateFun_tabindexValue()"
+									ng-keydown="$event.keyCode === 13 && StartupDateFun();StartupDateFun_tabindexValue()"
+									ng-change="checkStoreSupplierListViewBtn();dateValidation();" ng-blur="checkValidDate();storeSupplierStartFutureDate()"
+									class="assigningStartDate"> <i
+									class="date-icon glyphicon glyphicon-calendar assigningIconStyle"></i>
+							</div>
+						</div>
+
+
+						<div class="form-field mr10 dateDropdownIn">
+							<label class="select_label"><span>To</span><span ng-if="invalidSSLToDateError" style="color:red">{{invalidSSLToDateError}}</span></label>
+							<div class="input-group date-field" ng-click="EndupDateFun();endDateFun_tabindexValue()" ng-keydown="$event.keyCode === 13 && EndupDateFun();endDateFun_tabindexValue()">
+								<input ng-paste="$event.preventDefault()" id="endDateSSL_storelist" type="text" ng-model="endDateSSL" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									class="selectTabIndexValue selectedtab-storeList selectedtab-storeList1 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched assigningStartDate"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									ng-keydown="$event.keyCode === 13 && EndupDateFun();endDateFun_tabindexValue()"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="EndupDate.opened"
+									show-button-bar="false"
+									datepicker-options="endDateOptionsStoreSupplierList"
+									close-text="Close" ng-click="EndupDateFun();endDateFun_tabindexValue()" ng-blur="checkValidDate();storeSupplierToFutureDate()"
+									ng-change="checkStoreSupplierListViewBtn();dateValidation()" tabindex="10">
+								<i
+									class="date-icon glyphicon glyphicon-calendar assigningIconStyle"></i>
+							</div>
+						</div>
+
+
+						<div class="form-field mr10 submiticon">
+							<button class="selectTabIndexValue selectedtab-storeList selectedtab-storeList1 btn btn-field btn-green  iconcolor" title="Go"
+								ng-click="getAllAssignmentsWithFilters();removeInputValueStoreSupplier()"
+								ng-keydown="$event.keyCode === 13"
+								ng-disabled="assignActivityBtn" title="Go" tabindex="11" data-toggle="tooltip"  >Submit</button>
+						</div>
+
+						<div class="form-field mr10 submiticon refreshButtonAlign" >
+							<img src="/brta/app/ui/resources/images/refresh.png" tabindex="12"
+								ng-click="refreshStoreSupplierList(buyCustomerSelected,address.states,startDate, endDate)"
+								ng-keydown="$event.keyCode === 13 && refreshStoreSupplierList(buyCustomerSelected,address.states,startDate, endDate)" data-toggle="tooltip"
+								ng-disabled="assignActivityBtn" title="Reset"
+								style="height: 94%;" class="refreshTooltip selectTabIndexValue selectedtab-storeList selectedtab-storeList1">
+							<!--<i class="fa fa-angle-right"></i>-->
+						</div>
+					
+						
+						
+					
+
+						<div class="form-field mr0 pull-right alignAssignmentButton"  >
+						<button type="button" style="" tabindex="-1" 
+							class="btn btn-widthfrequency selectedtab-storeList selectedtab-storeList1 btn-edit freqicon pad-frequtopbottom setdataPopupAlignment topsetdata"
+							 ng-click="addAssignDriverPopup();generateAssignmentTabindex()" 
+							ng-disabled="assignActivityPopupBtn" title="Generate Assignment" data-toggle="tooltip"  >Generate Assignment
+						</button>
+						
+						
+						
+						
+						
+
+							<a class="reportwith" ng-click="storeSupplierPdf()"   ng-keydown="$event.keyCode === 13 && storeSupplierPdf()" > 
+							<img tabindex="13" class="pdfTooltip selectTabIndexValue  selectedtab-storeList selectedtab-storeList1" 
+								src="/brta/app/ui/resources/images/new_pdf.png" 
+								title="Download Pdf" data-toggle="tooltip">
+
+							</a>
+							<a excel-export export-data="exporStoreSupplierData" file-name="{{storeSupplierfileName}}" class="reportwith selectTabIndexValue selectedtab-storeList selectedtab-storeList1 form-btn" ng-if="exporStoreSupplierData!=undefined && exporStoreSupplierData.length>0" id="supplierListExcelData"  ng-keydown="$event.keyCode === 13 && executeExcel_storeList()"></a>
+							<span title="Download Excel" data-toggle="tooltip">
+							 <a class="reportwith selectTabIndexValue selectTabIndexValue1 selectedtab-storeList selectedtab-storeList1"  tabindex="14"
+							 ng-if="!(exporStoreSupplierData!=undefined && exporStoreSupplierData.length>0)" class="form-btn"
+								 > <img
+								src="/brta/app/ui/resources/images/new_excel.png">
+							</a> </span>
+							<!-- <span title="Download Excel" data-toggle="tooltip">
+							 <a tabindex="0" class="reportwith selectTabIndexValue selectedtab-storeList selectedtab-storeList1 form-btn" ng-if="jsonForStoreSupplierExport!=undefined && jsonForStoreSupplierExport.length>0" 
+								 ng-csv="jsonForStoreSupplierExport"
+								csv-header="['Customer Name','Store Name','Supplier Name','Sell Customer Site Name','Material Profile','Frequency','Start Date','End Date']"
+								filename="Store Supplier List.csv" id="supplierListExcelData" 
+								ng-keydown="$event.keyCode === 13 && executeExcel_storeList()"> <img
+								src="/brta/app/ui/resources/images/new_excel.png"
+								>
+							</a>
+						</span>
+							<span title="Download Excel" data-toggle="tooltip">
+							 <a class="reportwith selectTabIndexValue selectTabIndexValue1 selectedtab-storeList selectedtab-storeList1"  tabindex="14"
+							 ng-if="!(jsonForStoreSupplierExport!=undefined && jsonForStoreSupplierExport.length>0)" class="form-btn"
+								 > <img
+								src="/brta/app/ui/resources/images/new_excel.png">
+							</a> </span> -->
+
+
+						</div>
+
+					</div>
+				</div>
+
+				<div ng-show="showSuccessMessageActivity"
+					style="color: red; margin-left: 449px;">
+					<span>Driver is successfully assigned </span>
+				</div>
+				
+				
+				
+				<div class="custom_table table-align-storelist" ng-if="storeSupplierViewValid">					
+					<table id="listResources"    ng-init="updateSearchFilterSSV()" 
+						datatable="" dt-options="dtOptionsSSV"
+						dt-columns="dtColumnsSSV" dt-instance="dtInstanceSSV"
+						class="datatable resource-table" cellspacing="0" width="100%">
+					</table>
+					
+					<button type="button" style="display: none;" id="triggerSSVSelect"
+							 ng-click="checkAllAssign(dtInstanceSSV)" 
+							  >Trigger
+						</button>
+					<div >
+						<button type="button" style="" tabindex="0" 
+							class=" setdataPopupAlignment btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom assignimg-width generateAssignemntAlignemnt"
+							title="Generate Assignment" data-toggle="tooltip"  ng-click="addAssignDriverPopup();assignTabIndex()" 
+							ng-disabled="assignActivityPopupBtn">Generate Assignment
+						</button>
+						
+					</div>
+					</div>
+					<div class="custom_table table-align-storelist" ng-if="!storeSupplierViewValid">
+					<table id="listResources" ng-if="!storeSupplierViewValid"  cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tr_width" style="width: 9%;">
+									<div class="custom-check checkboxMarginremv">
+										<input type="checkbox" id="selectallInAssign"
+											ng-disabled="storeSupplierCheckAllBtn"
+											ng-model="Suppliertemp.selectall"
+											ng-change="checkAllAssign()" tabindex="0" class="checkboxTabindex selectTabIndexValue1"> <label
+											for="selectallInAssign" class="selctall_label"><div
+												class="select"></div></label>
+									</div> <span class="selectCheckBoxAlign">Select</span>
+								</th>
+								<th class="tr_width">Customer <span class="tableWrapping">Name</span></th>
+								<th class="tr_width">Store <span class="tableWrapping">Name</span></th>
+								<th class="tr_width">Supplier Name</th>
+								<th class="tr_width" style="width: 18% !important;">Sell Customer  Site Name</th>
+								<th class="tr_width">Material <span class="tableWrapping">Profile</span></th>
+								<th class="tr_width">Frequency</th>
+
+								<th class="tr_width">Start Date</th>
+								<th class="tr_width">End Date</th>
+								<th class="tr_width" style="width: 20px !important;">Edit</th>
+
+							</tr>
+						</thead>
+					</table>
+					
+				</div>
+				
+				
+			</div>
+
+			<div class="tab_panelNotRequired" ng-show="assignment">
+				<div class="filter-frequency">
+					<div class="filter-block1">
+
+
+						<div class="form-field mr10 dropDownWidthOut">
+							<label class="select_label "><span> Customer</span></label> <select tabindex="6"
+								class="select-field h56 selectTabIndexValue" ng-model="buyCustomerSelectedAct"
+								ng-change="getFilteredValuesSSL(buyCustomerSelectedAct,assignmentSupplierSelected); checkAssignmentSubmitBtn();" style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="customer in buyCustomers | orderBy: 'customerName'" value='{{customer}}'>{{customer.customerName}}</option>
+							</select>
+							
+								
+						</div>
+						
+						
+						
+						
+						<div class="spinner-overlay" ng-show="loaderAssignActivity"
+							style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+							</div>
+						</div>
+
+						<div class="form-field mr10 dropDownWidthOut">
+							<label class="select_label "><span>Supplier</span></label> <select tabindex="7"
+								class="select-field h56 selectTabIndexValue " ng-model="assignmentSupplierSelected" ng-disabled="isSupplierRole"
+								ng-disabled="buyCustomerSelectedAct==null && suppliersForCustomerSelected.length != 0"
+								ng-change="getFilteredValuesSSL(buyCustomerSelectedAct,assignmentSupplierSelected)" ng-disabled="isSupplierRole"
+								style="width: 100%;">
+								<option value="" style="width: 10px !important;">Please Select</option>
+								<option style="width: 10px !important;" ng-repeat="supplier in suppliersForCustomerSelected | orderBy: 'description'" value='{{supplier}}'>{{supplier.description}}</option>
+							</select>
+						</div>
+						
+								
+
+
+						<div class="form-field mr10 dateDropdownIn  ">
+							<label class="select_label"><span>Assigned Date
+									From </span><span ng-if="invalidAssignmentStartDateError" style="color:red">{{invalidAssignmentStartDateError}}</span></label>
+							<div class="input-group date-field"
+								ng-click="AssignmentStartDate();startDateFun_tabindexAssign()"
+								ng-keydown="$event.keyCode === 13 && AssignmentStartDate();startDateFun_tabindexAssign()">
+
+								<input id="assignmentDateStart_assign" ng-paste="$event.preventDefault()" type="text" ng-model="assignmentDateStart" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									class="selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3-value input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched assigningStartDate"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy"
+									is-open="AssignmentDateStart.opened" show-button-bar="false"
+									datepicker-options="startDateOptionsAssignmentList"
+									close-text="Close" ng-click="AssignmentStartDate();startDateFun_tabindexAssign()"
+									ng-keydown="$event.keyCode === 13 && AssignmentStartDate();startDateFun_tabindexAssign()"
+									ng-change="dateValidation()" tabindex="8" ng-blur="checkValidDate();assignmentStartFutureDate()"> <i
+									class="date-icon glyphicon glyphicon-calendar assigningIconStyle"></i>
+							</div>
+						</div>
+
+
+
+
+
+						<div class="form-field mr10 dateDropdownIn">
+							<label class="select_label"><span> Assigned Date
+									To</span><span ng-if="invalidAssignmentEndDateError" style="color:red">{{invalidAssignmentEndDateError}}</span></label>
+							<div class="input-group date-field"
+								ng-click="AssignmentEndDate();endDateFun_tabindexAssign()"
+								ng-keydown="$event.keyCode === 13 && AssignmentEndDate();endDateFun_tabindexAssign()">
+								<input ng-paste="$event.preventDefault()" id="assignmentDateEnd_assign" type="text" ng-model="assignmentDateEnd" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									class="selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched assigningStartDate"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy"
+									is-open="AssignmentDateEnd.opened" show-button-bar="false"
+									datepicker-options="endDateOptionsAssignmentList"
+									close-text="Close" ng-click="AssignmentEndDate()"
+									ng-keydown="$event.keyCode === 13 && AssignmentEndDate();endDateFun_tabindexAssign()"
+									ng-change="dateValidation()" tabindex="9" ng-blur="checkValidDate();assignmentSEndFutureDate()"> <i
+									class="date-icon glyphicon glyphicon-calendar assigningIconStyle" ></i>
+							</div>
+							</label>
+						</div>
+
+						<div class="spinner-overlay" ng-show="loaderAssignment"
+							style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+							</div>
+						</div>
+
+
+
+						<div class="form-field mr10 submiticon ">
+							<button tabindex="10" class="btn btn-field btn-green  iconcolor selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3" title="Go"
+								ng-click="showAssignedDrivers();removeInputValueStoreAssignment()" ng-keydown="$event.keyCode === 13"
+								ng-disabled="assignAssignmentBtn" data-toggle="tooltip"  >Submit</button>
+						</div>
+						<div class="form-field mr10 submiticon refreshButtonAlign" >
+							<a><img src="/brta/app/ui/resources/images/refresh.png" type="button" tabindex="11" 
+								ng-click="refreshAssignments()" ng-keydown="$event.keyCode === 13 && refreshAssignments()" ng-disabled="storeListViewBtn"
+								title="Reset" style="height: 94%;" class="refreshTooltip selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3" data-toggle="tooltip"></a>
+
+							<!--<i class="fa fa-angle-right"></i>-->
+						</div>
+						 <div class="form-field mr0 pull-right" style="margin-top: 3%;">
+
+							<a  class="reportwith" ng-click="assignmentPdf()" ng-keydown="$event.keyCode === 13 && assignmentPdf()"> 
+							<img tabindex="12" class="pdfTooltip selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3" 
+								src="/brta/app/ui/resources/images/new_pdf.png"
+								title="Download Pdf" data-toggle="tooltip">
+							</a> 
+							<a excel-export export-data="exportAssignmentData" file-name="{{assignemntfileName}}" class="reportwith selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3 form-btn " id="assignemntExcelData"  ng-if="exportAssignmentData!=undefined && exportAssignmentData.length>0" ng-keydown="$event.keyCode === 13 && executeExcel_assign()"></a>
+
+							<span title="Download Excel" data-toggle="tooltip">
+							<a  tabindex="0" class="reportwith selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3" class="form-btn selectTabIndexValue" ng-if="!(exportAssignmentData!=undefined && exportAssignmentData.length>0)" > <img
+								src="/brta/app/ui/resources/images/new_excel.png">
+							</a>
+						</span>
+
+							<!-- <span title="Download Excel" data-toggle="tooltip">
+							<a tabindex="0" class="reportwith selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3" class="form-btn" ng-if="jsonForAssignmentExport!=undefined && jsonForAssignmentExport.length>0"
+								 ng-csv="jsonForAssignmentExport"
+								csv-header="['Customer','Store Name','Day Driver','Night Driver','Assigned Date From','Assigned Date To']"
+								filename="Assignment.csv"  id="assignemntExcelData"  ng-keydown="$event.keyCode === 13 && executeExcel_assign()"  > 
+								<img src="/brta/app/ui/resources/images/new_excel.png">
+							</a>
+						</span>
+							<span title="Download Excel" data-toggle="tooltip">
+							<a  tabindex="0" class="reportwith selectTabIndexValue selectedtab-storeList2 selectedtab-storeList3" class="form-btn selectTabIndexValue" ng-if="!(jsonForAssignmentExport!=undefined && jsonForAssignmentExport.length>0)" > <img
+								src="/brta/app/ui/resources/images/new_excel.png">
+							</a>
+						</span> -->
+						</div> 
+
+					</div>
+				</div>
+
+
+
+				<div class="custom_table table-align-storelist" ng-if="assignmentViewValid" >
+					
+					<table  id="listResourcesAssignment" ng-if="assignmentViewValid" dt-instance="dtInstance" 
+						datatable="" dt-options="dtOptionsAV"
+						dt-columns="dtColumnsAV" dt-instance="dtInstanceAV"
+						class="datatable resource-table" cellspacing="0" width="100%">
+					</table>
+					
+					</div>
+					<div class="custom_table table-align-storelist" ng-if="!assignmentViewValid"  >
+					<table id="listResourcesAssignment" ng-if="!assignmentViewValid"  cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tr_width">Customer</th>
+								<th class="tr_width">Store Name</th>
+								<th class="tr_width">Day Driver</th>
+								<th class="tr_width">Night Driver</th>
+								<th class="tr_width">Assigned Date From</th>
+								<th class="tr_width">Assigned Date To</th>
+								<th class="tr_width" style="width: 20px">Edit</th>
+							</tr>
+						</thead>
+
+						
+					</table>
+
+
+				</div>
+			</div>
+		</div>
+
+
+
+
+
+
+
+
+		<!-- SET DATA Popup Begin -->
+		<div class="set-data-popup popup_overlay fadein" ng-if="setDataPopup">
+
+
+			<div class="popup_content setdata-scroll">
+				<div class="spinner-overlay" ng-show="setDataLoader"
+					style="padding-bottom: 20px">
+					<div class="loader-inner">
+						<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+					</div>
+				</div>
+				<div class="popup-header">
+					<button type="button" class="close"
+						ng-click="setDataPopupContentClose();assignTabIndexclose();assignmentTabStoreList()" tabindex="-1">
+						<img src="/brta/app/ui/resources/images/close_btn.png" >
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						<b>{{setDataLabel}} Data</b>
+					</h4>
+					<div class="alert" ng-show="errorFlag">Please provide a Store
+						Start Date</div>
+				</div>
+				<div class="popup-body ">
+
+					<div class="scroll-popup">
+						<div class="container containerWithoudPadding">
+							<h5 class="popUpHeadingh6" style="padding-left: 15px">
+								<b>Select Supplier*</b> <span ng-if="!setDatapopup.supplier" ng-show="error.errorServiceProviderFlag" style="color: red;"> Please select Supplier </span>
+							</h5>
+							<div class="popup-layer ">
+
+
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+
+										<ui-select ng-model="setDatapopup.supplier"  on-select="updateSupplier($item)" theme="bootstrap" tabindex="1" autofocus>
+										<ui-select-match placeholder="Select Supplier"
+											ng-click="$selectMultiple.removeChoice($index);removeSupplier($item)">{{$select.selected.description}}</ui-select-match>
+
+										<ui-select-choices
+											repeat="supplier in suppliersForSetDataPopUp| orderBy:'description' | filter:{description: $select.search}"
+											class="flexcroll" style=" width: 60% !important;">
+										<div ng-click="updateSupplier(supplier);updateSellCustomerFromSupplierAndBuyCustomer(supplier)">{{supplier.description}}
+										</div>
+										<label for="supplier{{$index}}"></label> </ui-select-choices> </ui-select>
+
+									</div>
+								</div>
+							</div>
+							
+						</div>
+						<div class="container containerWithoudPadding">
+							<h5 class="popUpHeadingh5">
+								<b>Destination</b>
+							</h5>
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Sell Customer*</b> <span ng-if="!(setDatapopup.sellCustomer.length >0)" ng-show="error.errorSellCustomerFlag" style="color: red;"> Please select Sell Customer </span>
+											</h5>
+
+											<div class="select-field serviceprovider-multifilter ">
+
+												<ui-select id="customerNameIcon" multiple ng-model="setDatapopup.sellCustomer" tabindex="2" 
+													on-select="updateSellCustomer($item)"
+													on-remove="removeSellCustomer($item)"
+													theme="bootstrap" ng-disabled="disabled"
+													close-on-select="true" remove-selected="false"
+													style="width: 300px;min-height: 34px" > 
+													<ui-select-match	placeholder="Select Sell Customer">
+												{{$item.customerName}} <span class=""
+													ng-hide="$select.disabled"
+													ng-click="$selectMultiple.removeChoice($index);"><i
+													class="fa fa-times selectFAIcon" aria-hidden="true"></i></span> </ui-select-match> <ui-select-choices
+													repeat="sellCustomer in sellCustomersForSetDataPopUp | orderBy:'customerName' | filter:{customerName: $select.search}"
+													class="flexcroll" style="    width: 60% !important;">
+												<div>{{sellCustomer.customerName}}
+												</div>
+												<label for="supplier{{$index}}"></label> <!-- <input type="checkbox" name=""	style="float: right;">  -->
+												</ui-select-choices> </ui-select>
+												<span class="caret" open-menu-by-click="customerNameIcon"
+													style="position: relative; float: right; top: -15px; margin-right: 1%;"></span>
+
+											</div>
+
+										</div>
+									</div>
+								</div>
+							</div>
+							<div
+								class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer " style="padding: 0px 15px;">
+
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Sell Customer Site*</b> <span ng-if="!(setDatapopup.sellCustomerSite.length > 0)" ng-show="error.errorSellCustomerSiteFlag" style="color: red;"> Please select Sell Customer Site </span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter">
+
+
+												<ui-select id="siteNameIcon" multiple ng-model="setDatapopup.sellCustomerSite" tabindex="3"
+													on-select="updateSellCustomerSite($item)"
+													theme="bootstrap" ng-disabled="disabled"
+													close-on-select="true" remove-selected="false"
+													style="width: 300px;min-height: 34px" > <ui-select-match
+													placeholder="Select Sell Customer Site"
+													style="width: 1000px;">{{$item.siteName}}
+
+												<span class="" ng-hide="$select.disabled"
+													ng-click="$selectMultiple.removeChoice($index);removesellCustomerSite($item)"><i
+													class="fa fa-times selectFAIcon" aria-hidden="true"></i></span> </ui-select-match> <ui-select-choices
+													repeat="sellCustomerSite in destinationSitesForDestinationSelected | orderBy:'siteName' | filter:{siteName: $select.search}"
+													class="flexcroll" style="width: 60% !important;">
+
+
+												<div ng-click="updateSellCustomerSite(sellCustomerSite)">{{sellCustomerSite.siteName}}
+												</div>
+												<label for="sellCustomerSite{{$index}}"></label> <!--    <input type="checkbox" name="" style="float: right;"> -->
+												</ui-select-choices> </ui-select>
+												<span class="caret"  open-menu-by-click="siteNameIcon"
+													style="position: relative; float: right; top: -15px; margin-right: 1%;"></span>
+
+											</div>
+
+										</div>
+										
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="container containerWithoudPadding"
+							style="border-bottom: 1px solid #DADCDD; padding-bottom: 10px;">
+							<div class="col-md-6 col-lg-6">
+								<div lass="popup-layer ">
+									<h5 class="popUpHeadingh6">
+										<b>Start Date*</b> 
+										<span ng-if="invalidSetDataStartDateError" style="color:red">{{invalidSetDataStartDateError}}</span>
+										<span ng-if="!setDatapopup.balePickupStartDate" ng-show="error.errorDateFlag" style="color: red;"> Please select Start Date </span>
+									</h5>
+									<div class="form-field mr10">
+										<label class="select_label setPopUpDateAlign" style="border: none;">
+											<div class="input-group date-field"
+												ng-click="StartDateSetDataPopupFun();startDateFun_tabPopup()" ng-keydown="$event.keyCode === 13 && StartDateSetDataPopupFun();startDateFun_tabPopup()">
+												<input type="text" tabindex="4" id="balePickupStartDate_setDatapopup" ng-paste="$event.preventDefault()"
+												ng-keydown="$event.keyCode === 13 && StartDateSetDataPopupFun();startDateFun_tabPopup()"
+													style="padding: 10px !important; height: 30px;margin-top: 0px;    min-height: 34px;z-index: -1;"
+													ng-model="setDatapopup.balePickupStartDate" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+													class="form-control bordercolorG selectTabindex_popup selectTabindex_popup-tabValue input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+													placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+													uib-datepicker-popup="MM-dd-yyyy"
+													is-open="StartDateSetDataPopup.opened"
+													show-button-bar="false"
+													datepicker-options="startDateOptionsSetData"
+													close-text="Close" ng-click="StartDateSetDataPopupFun();startDateFun_tabPopup()"
+													ng-change="dateValidationSetDataPopup()"
+													ng-blur="checkValidDate()"> <i
+													class="date-icon glyphicon glyphicon-calendar"
+													style="top: 5px; padding: -1px !important;"></i>
+											</div>
+										</label>
+									</div>
+									
+
+								</div>
+							</div>
+
+
+							<div class="col-md-6 col-lg-6">
+								<div lass="popup-layer ">
+									<h5 class="popUpHeadingh6">
+										<b>End Date 
+										<span ng-if="invalidSetDataEndDateError" style="color:red">{{invalidSetDataEndDateError}}</span>
+										<span ng-if="endDateSetDataPopupErrorMessage"
+											style="color: red;"> ( End date should be greater than
+												Start date )</span></b>
+
+									</h5>
+									<div class="form-field mr10">
+										<label class="select_label setPopUpDateAlign" style="border: none;">
+											<div class="input-group date-field"
+												ng-click="EndDateSetDataPopupFun();endDateSetDataPopupFun_TabIndexPopUp()"
+												ng-keydown="$event.keyCode === 13 && EndDateSetDataPopupFun();endDateSetDataPopupFun_TabIndexPopUp()">
+												<input type="text" tabindex="5" id="balePickupEndDate_setDatapopup" ng-paste="$event.preventDefault()"
+													style="padding: 10px !important; min-height: 30px;margin-top: 0px;    height: 34px;z-index: -1;"
+													ng-model="setDatapopup.balePickupEndDate" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+													class="form-control bordercolorG selectTabindex_popup endDateSetDataPopupFun_TabIndex input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+													placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+													uib-datepicker-popup="MM-dd-yyyy"
+													is-open="EndDateSetDataPopup.opened"
+													show-button-bar="false"
+													ng-keydown="$event.keyCode === 13 && EndDateSetDataPopupFun();endDateSetDataPopupFun_TabIndexPopUp()"
+													datepicker-options="endDateOptionsSetData"
+													close-text="Close" ng-click="EndDateSetDataPopupFun();endDateSetDataPopupFun_TabIndexPopUp()"
+													ng-change="dateValidationSetDataPopup()"
+													ng-blur="checkValidDate()"> <i
+													class="date-icon glyphicon glyphicon-calendar"
+													style="top: 5px;"></i>
+											</div>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="container containerWithoudPadding">
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Frequency*</b><span ng-if="!setDatapopup.frequency" ng-show="error.errorFrequencyFlag" style="color: red;"> Please select Frequency </span>
+											</h5>
+
+											<div class="select-field serviceprovider-multifilter ">
+
+
+												<ui-select ng-model="setDatapopup.frequency" 
+													theme="bootstrap" on-select="updateFrequency($item)"> <ui-select-match
+													placeholder="Select Frequency">{{$select.selected.description}}</ui-select-match>
+
+												<ui-select-choices tabindex="6" class="selectTabindex_popup endDateSetDataPopupFun_TabIndex"
+													repeat="frequency in recommandedFrequency | orderBy:'description' | filter:{description: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												<div ng-click="updateFrequency(frequency)">{{frequency.description}}
+												</div>
+												<label for="frequency{{$index}}"></label> </ui-select-choices> </ui-select>
+
+											</div>
+											
+											
+
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div
+								class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer " style="padding: 0px 15px;">
+
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>No. of Pickups per Frequency*</b><span ng-if="!setDatapopup.frequencyTimeValue" ng-show="error.errorFrequencyTimeValueFlag" style="color: red;"> Please select Pickups per Frequency </span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter">
+
+												<!--  <select name="repeatSelect" id="repeatSelect" tabindex="7"
+													ng-model="setDatapopup.frequencyTimeValue" 
+													style="width: 100%; background-position: 99%; border-radius: 2px;"
+													class="TimeHeight selectTabindex_popup endDateSetDataPopupFun_TabIndex"
+													ng-options="frequencyTime for frequencyTime in setDatapopup.frequencySelectedSubCategoryValues">
+													<option value="" selected disabled>Please select</option>
+
+												</select>-->
+												<ui-select ng-model="setDatapopup.frequencyTimeValue" 
+													theme="bootstrap" > <ui-select-match
+													placeholder="Select Pickups per Frequency">{{$select.selected}}</ui-select-match>
+
+												<ui-select-choices tabindex="6" class="selectTabindex_popup endDateSetDataPopupFun_TabIndex"
+													repeat="  frequencyTime in setDatapopup.frequencySelectedSubCategoryValues | filter: $select.search"
+													class="flexcroll" style=" width: 60% !important;">
+												<div ng-click="">{{frequencyTime}}
+												</div>
+												<label for="frequencyTime{{$index}}"></label> </ui-select-choices> </ui-select>
+
+											</div>
+											
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="container containerWithoudPadding">
+							<div class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+							<div class="popup-layer " style="padding: 0px 15px;">
+								<h5 class="popUpHeadingh6">
+									<b>Select Material Profile*</b> <span ng-if="!(setDatapopup.materials.length >0)" ng-show="error.errorMaterialFlag" style="color: red;"> Please select Materials </span>
+								</h5>
+
+								<div
+									class="select-field  checkbox-position border-removesuppliersite">
+
+
+									<ui-select id="materialDescriptionIcon" multiple ng-model="setDatapopup.materials" 
+										on-select="updateMaterialProfile();updateMaterial($item)"
+										on-remove="removeMaterial($item)"
+										theme="bootstrap" ng-disabled="disabled"
+										close-on-select="true" remove-selected="false" title=""
+										style=" width: 100% !important;min-height: 34px;" > 
+										<ui-select-match
+										placeholder="Search">{{$item.description}}
+										 <span
+										 ng-hide="$select.disabled"
+										ng-click="$selectMultiple.removeChoice($index);"><i
+										class="fa fa-times selectFAIcon" aria-hidden="true"></i></span> </ui-select-match> <ui-select-choices
+										tabindex="8" class="selectTabindex_popup endDateSetDataPopupFun_TabIndex"
+										repeat="material in materials | orderBy:'description' | filter:{description: $select.search}"
+										class="flexcroll" style="    width: 60% !important;">
+
+									<div class="execute_updateMaterial">{{material.description}}</div>
+
+
+									<label for="material{{$index}}"></label> </ui-select-choices> </ui-select>
+									<span class="caret"  open-menu-by-click="materialDescriptionIcon"
+										style="position: relative; float: right; top: -15px; margin-right: 1%;"></span>
+
+
+
+
+								</div>
+								
+								
+
+							</div>
+						</div>
+					</div>
+
+						<div class="container popup-layer containerWithoudPadding"
+							 >
+							<table class="table table-bordered">
+								<thead>
+									<tr style="background: #78B704; color: white;">
+										<th style="width:5%">#</th>
+										<th style="width:35%">Material Profile</th>
+										<th>Avg. Weight (lbs)</th>
+									</tr>
+								</thead>
+								<tbody ng-show="setDatapopup.materialSelected.length!=0" ng-show="!setDatapopup.materialSelected.length!=0">
+									<tr ng-repeat="material in setDatapopup.materialSelected">
+										<td>{{ $index+1}}</td>
+										<td>{{material.description}}</td>
+										<td><input only-numeric type="text"
+											class="form-control tabindexmaterial selectTabindex_popup endDateSetDataPopupFun_TabIndex endDateSetDataPopupFun_TabIndex input-field bordercolorG set-data-input-height "
+											maxlength="4" ng-model="material.avgBaleWeight"
+											placeholder="Avg Wt in lbs" tabindex="0" style="width:40%"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+
+						<div class="popup-footer">
+							<div class="popup-layer pull-left borderbottomremv"></div>
+
+							<!--class="btn assign_btn  btn-primary floatright"-->
+							<button type="button"
+								class=" tabindexmaterial selectTabindex_popup endDateSetDataPopupFun_TabIndex btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom  saveButtonAlign "
+								ng-click="applyConfigurationData('set');assignTabIndexclose();assignmentTabStoreList()"
+								ng-keydown="$event.keyCode === 13 && assignTabIndexclose();assignmentTabStoreList()"
+								ng-disabled="endDateSetDataPopupErrorMessage;" tabindex="10">
+								<!-- <img src="/brta/app/ui/resources/images/editdata.png"
+									class="margin-setdata" title="Set Data" alt="wrong path"> -->
+								Save
+							</button>
+							 <span ng-repeat="n in [] | range:100" tabindex="{{ $index*1 + 12 }}" class="selectTabindex_popup endDateSetDataPopupFun_TabIndex">{{}}</span>
+
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+
+		<!-- SET DATA Popup END -->
+		<!---Assign driver popup Start------>
+
+		<div class="modal popup_overlay assign-activity-popup" id="myModal"
+			style="display: block;"
+			ng-show="isupdateFieldsForAssignActivity===true">
+			<div class="modal-dialog" style="width: 40%">
+				<!--inside contents-->
+				<div class="modal-content inner-content">
+					<!--header-->
+					<div class="modal-header inner-header">
+						<div class="inner-header-left">
+							<div class="custom-inner-c">
+								<h2>Generate Assignment</h2>
+							</div>
+						</div>
+						<div class="inner-header-right">
+							<img src="/brta/app/ui/resources/images/close_btn.png"
+								ng-click="assignactivityclose();assignTabIndexclose();assignmentTabStoreList()"  />
+						</div>
+					</div>
+					<!--body-->
+					<form name="userForm" novalidate>
+						<div class="inner-body">
+							<div class="select-drive-name">
+								<div class="inner-content">
+
+									<div class="form-field mr10 filter-group" style="width: 100%;">
+										<label class="select_label"><h5 class="popUpHeadingh6">
+												<b>Destination</b>
+											</h5> <!-- <select class="table_select select-field selct-box-height" ng-options="destinationdestination in destinationList" -->
+											<!-- ng-model="driverDestination" --> <!-- style="padding: 1% !important;border: 1px solid #cccccc; "> -->
+											<!-- <option value="">Please Select</option> --> <!-- </select> -->
+											<div class="dropdown_ld form-control" ng-if="destinationList.length >0" style="height: 50px;    padding: 6px 6px;">
+												<ul style="    padding-left: 5px; margin-bottom: 0px;font-size: 15px;">
+													<li ng-repeat="destination in destinationList">{{destination.name}}</li>
+
+												</ul>
+											</div>
+
+											<span style="color: red;" ng-if="!(destinationList.length > 0)">There are no common destination.</span> </label>
+									</div>
+
+								</div>
+							</div>
+							<div class="select-drive-name col-md-12" style="padding-right: 0px;padding-left:0px">
+								<div class="inner-content1">
+
+									<div class="col-md-6 form-group" >
+
+										<label class="select_label"><h5 class="popUpHeadingh5eadingh6">
+												<b>Day Driver*</b>
+											</h5> 
+											
+											<select  class="form-control generateAssinmenttab" name="dayDriver"  tabindex="1" id="selectItem"
+											ng-model="dayDriverSelectedinPopup"  ng-change="updateNightDrivers(dayDriverSelectedinPopup);"
+											ng-options="driver.firstName+' '+driver.lastName for driver in supplierselectedDayDrivers | orderBy:'firstName'"
+											style="padding-top: 2%; padding-bottom: 2%; height: 34px"
+											autofocus>
+												<option value="">Please Select</option>
+											</select>
+										
+										
+										</label>
+										<div class="help-block" ng-if="!dayDriverSelectedinPopup">
+											<span 
+												style="color: red; padding-left: 2%;">Please select
+												Day Driver</span>
+										</div>
+									</div>
+
+
+									<div class="col-md-6 form-group"  >
+										<label class="select_label"><h5 class="popUpHeadingh5eadingh6">
+												<b>Night Driver*</b>
+
+											</h5> <select class="form-control generateAssinmenttab"   tabindex="2" ng-change="updateDayDrivers(nightDriverSelectedinPopup)" id="selectedNightDriverTab"
+											ng-model="nightDriverSelectedinPopup" name="nightDriver"
+											ng-options="driver.firstName+' '+driver.lastName for driver in supplierselectedNightDrivers | orderBy:'firstName'"
+											 style="padding-top: 2%; padding-bottom: 2%; height: 34px">
+												<option value="">Please Select</option>
+										</select></label>
+										<div class="help-block" ng-if="!nightDriverSelectedinPopup">
+											<span 
+												style="color: red; padding-left: 2%;">Please select
+												Night Driver</span>
+										</div>
+										
+									</div>
+
+									</div>
+									</div>
+									
+									<div class="select-drive-name col-md-12" style="padding-right: 0px;padding-left:0px">
+								<div class="inner-content1">
+									
+
+						<div class="col-md-6 form-group"  >
+							<label class="select_label"><b>Assignment Start Date</b>
+							<span ng-if="invalidGenAssPopupStartDateError" style="color:red;font-size: 14px;">{{invalidGenAssPopupStartDateError}}</span>
+							</label>
+										<div class="input-group date-field">
+											<input type="text" ng-model="startDateAssignmentPopup" 
+											id="startDateAssignmentPopup_date" ng-paste="$event.preventDefault()"
+											tabindex="3" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+												class="form-control generateAssinmenttab selectItemPopUp assignmentPopupTabindex1 assignmentPopupTabindex-value input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched "
+												placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+												uib-datepicker-popup="MM-dd-yyyy" is-open="AssignmentStartDatePopup.opened"
+												show-button-bar="false"
+												datepicker-options="startDateOptionsAssignmentPopUp"
+												close-text="Close" ng-click="assignmentPopupStartDateFun();assignmentPopupstratdateTabindex()"
+												ng-change="checkStoreListViewBtn();dateValidation()"
+												ng-blur="checkValidDate()" autocomplete="off"style="height: 34px"> 
+												<i class="date-icon glyphicon glyphicon-calendar assigningIconStyle" style="z-index: 2;top: 5px;"  ng-click="assignmentPopupStartDateFun();assignmentPopupstratdateTabindex()"></i> 
+												<!-- <i
+												class="dte-icon glyphicon glyphicon-calendar assigningIconStyle" ng-click="assignmentPopupStartDateFun();assignmentPopupstratdateTabindex()"
+												style="color: green; font-size: 25px;z-index: 2;"></i> -->
+										</div>
+
+						</div>
+						<div class="col-md-6 form-group" >
+
+							<label class="select_label"><b>Assignment End Date</b>
+							<span ng-if="invalidGenAssPopupEndDateError" style="color:red;font-size: 14px;">{{invalidGenAssPopupEndDateError}}</span></label>
+							<div class="input-group date-field">
+								<input type="text" ng-model="endDateAssignmentPopup" tabindex="4" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									class="form-control generateAssinmenttab selectItemPopUp assignmentPopupTabindex1 assignmentPopupTabindex2 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									id="endDateAssignmentPopup_date" ng-paste="$event.preventDefault()"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="AssignmentEndDatePopup.opened"
+									show-button-bar="false"
+									datepicker-options="endDateOptionsAssignmentPopUp" close-text="Close"
+									ng-click="assignmentPopupEndDateFun();assignmentPopupEndDateTabindex()"
+									ng-change="checkStoreListViewBtn();dateValidation()" 
+									ng-blur="getDateFromAssignment()" autocomplete="off" style="height: 34px"> <i ng-click="assignmentPopupEndDateFun();assignmentPopupEndDateTabindex()"
+									class="date-icon glyphicon glyphicon-calendar assigningIconStyle" style="z-index: 2;top: 5px;"></i>
+							</div>
+									</div>
+
+
+								</div>
+
+
+							</div>
+						</div>
+
+						<div class="modal-footer "
+							style="text-align: center; padding: 0px;"></div>
+						<div style="text-align: center;">
+							<button type="button" tabindex="5"
+								class="selectItemPopUp generateAssinmenttab assignmentPopupTabindex1 assignmentPopupTabindex2 btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom assignimg-width"
+								title="Assign"
+								ng-click="saveDriverDetails(dayDriverSelectedinPopup,nightDriverSelectedinPopup,startDateAssignmentPopup,endDateAssignmentPopup);assignTabIndexclose();assignmentTabStoreList()"
+								ng-disabled="saveDriverBtn" style="margin-top: 10px;">
+								<!-- <img src="/brta/app/ui/resources/images/assign.png" alt="wrong path" title="Assign"> -->
+								Save Driver
+							</button>
+							<!-- <span ng-repeat="n in [] | range:100" tabindex="{{ $index*0 + 0 }}">{{}}</span>
+							<span ng-repeat="n in [] | range:100" tabindex="{{ $index*1 + 5 }}">{{}}</span> -->
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--assign driver assignactivity popup end-->
+	<!--assign activity set data popup-->
+	<div class="set-data-popup popup_overlay fadein"
+		ng-if="isupdateAssignmentPopup===true">
+		<div class="popup_content setdata-scroll">
+
+			<div class="popup-header">
+				<button type="button" class="close"
+					ng-click="editAssignmentContentClose()">
+					<img src="/brta/app/ui/resources/images/close_btn.png">
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					<b>Set Data</b>
+				</h4>
+				<div class="alert" ng-show="errorFlag">Please provide a Store
+					Start Date</div>
+			</div>
+			<div class="popup-body ">
+
+				<div class="scroll-popup">
+					<div class="container containerWithoudPadding">
+						<h5 class="popUpHeadingh5">
+							<b>Select Supplier*</b>
+						</h5>
+						<div class="popup-layer ">
+
+
+							<div
+								class="select-drive-name checkbox-position border-removesuppliersite">
+								<div class="inner-content box-align-provider">
+
+									<ui-select ng-model="allSuppliers.selected" theme="bootstrap">
+									<ui-select-match placeholder="Select Supplier"
+										ng-click="$selectMultiple.removeChoice($index);removeSupplier($item)">{{$select.selected.description}}</ui-select-match>
+									<ui-select-choices
+										repeat="supplier in allSuppliers| orderBy:'description' | filter:$select.search"
+										class="flexcroll" style=" width: 60% !important;">
+									<div ng-click="updateSupplier(supplier)">{{supplier.description}}
+									</div>
+									<label for="supplier{{$index}}"></label> </ui-select-choices> </ui-select>
+
+
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="container containerWithoudPadding">
+						<h5 class="popUpHeadingh5">
+							<b>Destination</b>
+						</h5>
+						<div
+							class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+							<div class="popup-layer " style="padding: 0px 15px;">
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+										<h5 class="popUpHeadingh6">
+											<b>Sell Customer*</b>
+										</h5>
+
+										<div class="select-field serviceprovider-multifilter ">
+
+											<ui-select multiple ng-model="saved" theme="bootstrap"
+												ng-disabled="disabled" close-on-select="false"
+												remove-selected="false" style="width: 300px;"
+												style="width: 1000px;"> <ui-select-match
+												placeholder="Select Sell Customer" style="width: 1000px;">{{$item.customerName}}
+											<span class="" ng-hide="$select.disabled"
+												ng-click="$selectMultiple.removeChoice($index);removeSellCustomer($item)"><i
+												class="fa fa-times selectFAIcon" aria-hidden="true"></i></span> </ui-select-match> <ui-select-choices
+												repeat="sellCustomer in sellCustomer | orderBy:'customerName' | filter:$select.search"
+												class="flexcroll" style="    width: 60% !important;">
+
+											<div ng-click="updateSellCustomer(sellCustomer)">{{sellCustomer.customerName}}
+											</div>
+											<label for="supplier{{$index}}"></label> <!-- <input type="checkbox" name=""
+													style="float: right;">  --> </ui-select-choices> </ui-select>
+											<span class="caret"
+												style="position: relative; float: right; top: -15px; margin-right: 1%;"></span>
+
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+						<div
+							class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+							<div class="popup-layer " style="padding: 0px 15px;">
+
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+										<h5 class="popUpHeadingh6">
+											<b>Sell Customer Site*</b>
+										</h5>
+										<div class="select-field serviceprovider-multifilter">
+
+
+											<ui-select multiple ng-model="sellCustomerSiteDumpSelected"
+												theme="bootstrap" ng-disabled="disabled"
+												close-on-select="false" remove-selected="false"
+												style="width: 300px;" style="width: 1000px;"> <ui-select-match
+												placeholder="Select Sell Customer Site"
+												style="width: 1000px;">{{$item.siteName}}
+											<span class="" ng-hide="$select.disabled"
+												ng-click="$selectMultiple.removeChoice($index);removesellCustomerSite($item)"><i
+												class="fa fa-times selectFAIcon" aria-hidden="true"></i></span> </ui-select-match> <ui-select-choices
+												repeat="sellCustomerSite in destinationSitesForDestinationSelected | orderBy:'siteName' | filter:$select.search"
+												class="flexcroll" style="    width: 60% !important;">
+											<div ng-click="updateSellCustomerSite(sellCustomerSite)">{{sellCustomerSite.siteName}}</div>
+											<label for="sellCustomerSite{{$index}}"></label> <!--    <input type="checkbox" name="" style="float: right;"> -->
+											</ui-select-choices> </ui-select>
+											<span class="caret"
+												style="position: relative; float: right; top: -15px; margin-right: 1%;"></span>
+
+
+
+
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="container containerWithoudPadding"
+						style="border-bottom: 1px solid #DADCDD; padding-bottom: 10px;">
+						<div class="col-md-6 col-lg-6">
+							<div lass="popup-layer ">
+								<h5 class="popUpHeadingh6">
+									<b>Start Date*</b>
+								</h5>
+								<div class="form-field mr10">
+									<label class="select_label setPopUpDateAlign">
+										<div class="input-group date-field"
+											ng-click="StartDateSetDataPopupFun()">
+											<input type="text"
+												
+												style="padding: 0% !important; height: 22px;"
+												ng-model="setDatapopup.balePickupStartDate" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+												class="input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+												placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+												uib-datepicker-popup="MM-dd-yyyy"
+												ng-model="setDatapopup.balePickupStartDate"
+												is-open="StartDateSetDataPopup.opened"
+												show-button-bar="false"
+												datepicker-options="dateOptionsStartSetDataPopupFun"
+												close-text="Close" ng-click="StartDateSetDataPopupFun()">
+											<i class="date-icon glyphicon glyphicon-calendar"
+												style="top: 11%; padding: -1px !important;"></i>
+										</div>
+									</label>
+								</div>
+
+							</div>
+						</div>
+
+
+						<div class="col-md-6 col-lg-6">
+							<div lass="popup-layer ">
+								<h5 class="popUpHeadingh6">
+									<b>End Date</b>
+								</h5>
+								<div class="form-field mr10">
+									<label class="select_label setPopUpDateAlign">
+										<div class="input-group date-field"
+											ng-click="EndDateSetDataPopupFun();">
+											<input type="text" id="balePickupEndDate_setDatapopup"
+												style="padding: 0% !important; height: 22px;"
+												ng-model="setDatapopup.endDateSetDataPopup" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+												class="input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+												placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+												uib-datepicker-popup="MM-dd-yyyy"
+												ng-model="setDatapopup.balePickupStartDate"
+												is-open="EndDateSetDataPopup.opened" show-button-bar="false"
+												datepicker-options="dateOptionEndSetDataPopupFun"
+												close-text="Close" ng-click="EndDateSetDataPopupFun()">
+											<i class="date-icon glyphicon glyphicon-calendar"
+												style="top: 11%;"></i>
+										</div>
+									</label>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="container containerWithoudPadding">
+						<div
+							class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+							<div class="popup-layer " style="padding: 0px 15px;">
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+										<h5 class="popUpHeadingh6">
+											<b>Frequency*</b>
+										</h5>
+
+										<div class="select-field serviceprovider-multifilter ">
+											<ui-select ng-model="$item.frequency" theme="bootstrap"
+												search-enabled="false"> <ui-select-match
+												placeholder="Select Frequency">{{$item.frequency.description}}</ui-select-match>
+
+											<ui-select-choices repeat="frequency in recommandedFrequency">
+											<div ng-click="updateFrequency(frequency)">{{frequency.description}}
+											</div>
+											<label for="frequency{{$index}}"></label> </ui-select-choices> </ui-select>
+
+
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div
+							class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+							<div class="popup-layer " style="padding: 0px 15px;">
+
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+										<h5 class="popUpHeadingh6">
+											<b>Time*</b>
+										</h5>
+										<div class="select-field serviceprovider-multifilter">
+
+
+											<select name="repeatSelect" id="repeatSelect"
+												ng-model="setDatapopup.frequencyTimeValue"
+												style="width: 100%; background-position: 99%; border-radius: 2px;"
+												class="TimeHeight"
+												ng-options="frequencyTime for frequencyTime in frequencySelectedSubCategoryValues">
+												<option value="" selected disabled>Please select</option>
+
+											</select>
+
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+					<div class="container containerWithoudPadding">
+						<div class="popup-layer " style="padding: 0px 15px;">
+
+							<h5 class="popUpHeadingh6">
+								<b>Select Material Profile*</b>
+							</h5>
+							<div
+								class="select-field  checkbox-position border-removesuppliersite"
+								style="width: 48.6%;">
+
+								<ui-select multiple ng-model="storeSupplierMaterial" on-select="updateMaterialProfile()"
+									theme="bootstrap" ng-disabled="disabled"
+									close-on-select="false" remove-selected="false" title=""
+									style=" width: 100% !important;"> <ui-select-match
+									placeholder="Search">{{$item.description}} <span
+									class="" ng-hide="$select.disabled"
+									ng-click="$selectMultiple.removeChoice($index);removeMaterial($item)"><i
+									class="fa fa-times selectFAIcon" aria-hidden="true"></i></span> </ui-select-match> <ui-select-choices
+									repeat="material in materialsSupplierProfile | filter:$select.search"
+									class="flexcroll" style="    width: 60% !important;">
+								<div ng-click="updateMaterial(material)">{{material.description}}
+								</div>
+
+								<label for="material{{$index}}"></label> </ui-select-choices> </ui-select>
+								<span class="caret"
+									style="position: relative; float: right; top: -15px; margin-right: 1%;"></span>
+
+
+
+
+							</div>
+
+						</div>
+					</div>
+
+					<div class="container popup-layer containerWithoudPadding"
+						>
+						<table class="table table-bordered">
+							<thead>
+								<tr style="background: #78B704;">
+									<th>#</th>
+									<th>Material Profile</th>
+									<th>Avg. Weight (lbs)</th>
+								</tr>
+							</thead>
+							<tbody ng-show="setDatapopup.materialSelected.length!=0">
+								<tr ng-repeat="material in setDatapopup.materialSelected">
+									<td>{{$index+1}}</td>
+									<td>{{material.description}}</td>
+									<td><input only-numeric type="text"
+										class="tabindexmaterial input-field bordercolorG set-data-input-height"
+										maxlength="0" ng-model="material.avgBaleWeight"
+										placeholder="Avg Wt in lbs"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+
+					<div class="popup-footer">
+						<div class="popup-layer pull-left borderbottomremv"></div>
+
+						<!--class="btn assign_btn  btn-primary floatright"-->
+						<button type="button"
+							class="tabindexmaterial btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom saveButtonAlign"
+							ng-click="applyConfigurationData('edit')"
+							ng-disabled="setDataApplyBtn_{{customerSiteIdForBtn}}">
+							<img src="/brta/app/ui/resources/images/editdata.png"
+								class="margin-setdata" title="Set Data" alt="wrong path">
+							Save
+						</button>
+
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+	</div>
+
+	<!-- SET DATA Popup END -->
+
+
+
+	<!---update driver Assignment tab Start------>
+
+	<div class="modal popup_overlay assign-activity-popup" id="myModal"
+		style="display: block;" ng-if="isupdateAssignDriverPopup===true">
+		<div class="modal-dialog">
+			<!--inside contents-->
+			<div class="modal-content inner-content">
+				<!--header-->
+				<div class="modal-header inner-header">
+					<div class="inner-header-left">
+						<div class="custom-inner-c">
+							<h2>Generate Assignment</h2>
+						</div>
+					</div>
+					<div class="inner-header-right">
+						<img src="/brta/app/ui/resources/images/close_btn.png"
+							ng-click="updateDriverclose()" />
+					</div>
+				</div>
+				<!--body-->
+				<div class="inner-body">
+					<div class="select-drive-name">
+						<div class="inner-content">
+
+							<div class="form-field mr10 filter-group" style="width: 100%;">
+								<label class="select_label"><h5 class="popUpHeadingh6">
+										<b>Select Destination</b>
+									</h5> <select class="table_select select-field selct-box-height"
+									ng-model="driverDestination"
+									style="padding: 1% !important; border: 1px solid #cccccc;">
+										<option value="">Please Select</option>
+										<option>Destination 1</option>
+										<option>Destination 2</option>
+										<option>Destination 3</option>
+										<option>Destination 4</option>
+								</select>
+							</div>
+
+						</div>
+					</div>
+					<div class=" ">
+						<div class="inner-content">
+							<!-- <h2>Assign Driver</h2> -->
+
+							<div class="form-field col-md-6 col-lg-6 filter-group"
+								style="">
+
+								<label class="select_label"><h5 class="popUpHeadingh6">
+										<b>Day Driver</b>
+									</h5> <select class="select-field"
+									ng-model="dayDriverSelectedinPopup"
+									ng-options="driver.lastName + ' ' + driver.firstName for driver in driverList | orderBy:'lastName'"
+									style="border: 1px solid #cccccc; padding-top: 2%; padding-bottom: 2%;">
+										<option value="">Please Select</option>
+								</select></label>
+							</div>
+							<div class="form-field col-md-6 col-lg-6 filter-group assign-rightbtn"
+								style=" ">
+								<label class="select_label"><h5 class="popUpHeadingh6">
+										<b>Night Driver</b>
+									</h5> <select class="select-field"
+									ng-model="nightDriverSelectedinPopup"
+									ng-options="driver.lastName + ' ' + driver.firstName for driver in driverList | orderBy:'lastName'"
+									style="border: 1px solid #cccccc; padding-top: 2%; padding-bottom: 2%;">
+										<option value="">Please Select</option>
+								</select></label>
+							</div>
+
+
+
+						</div>
+
+
+					</div>
+				</div>
+
+
+				<div class="modal-footer" style="text-align: center; padding: 10px;">
+					<button type="button"
+						class="btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom assignimg-width"
+						title="Assign"
+						ng-click="saveDriverDetails(driverDestination,dayDriverSelectedinPopup,nightDriverSelectedinPopup)" style="    margin-top: 10px;">
+						<!-- <img src="/brta/app/ui/resources/images/assign.png" alt="wrong path" title="Assign"> -->
+						Save Driver
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!----update driver Assignment tab end------->
+
+<!--error popup for selecting multiple suppliers-->
+
+
+<div class="modal popup_overlay assign-activity-popup" id="myModal"
+	style="display: block;" ng-if="ifmultiplesupplersselected===true">
+	<div class="modal-dialog" style="width: 30%;">
+		<!--inside contents-->
+		<div class="modal-content inner-content">
+			<!--header-->
+			<div class="modal-header inner-header">
+				<div class="inner-header-left">
+					<div class="custom-inner-c">
+						<h2>Error !</h2>
+					</div>
+				</div>
+				<div class="inner-header-right">
+					<img src="/brta/app/ui/resources/images/close_btn.png"
+						ng-click="multiplesupplieridselected()" />
+				</div>
+			</div>
+			<!--body-->
+			<div class="inner-body">
+				<div class="select-drive-name">
+					<div class="inner-content"></div>
+				</div>
+				<div class="select-drive-name" style="border: none">
+					<div class="inner-content">
+						<!-- <h2>Assign Driver</h2> -->
+
+						<div class="form-field mr10 filter-group">
+
+							<label class="select_label"><h5 class="popUpHeadingh6">
+									<h4>Please Select Same Supplier Name</h4>
+						</div>
+
+
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<script type="text/ng-template" id="warning-dialog.html">
+  <div class="modal-header">
+   <h3>Your session has been expired! Please login again.</h3>
+  </div>
+  <div idle-countdown="countdown" ng-init="countdown=5" class="modal-body">
+   <uib-progressbar max="5" value="5" animate="false" class="progress-striped active">You'll be logged out in {{countdown}} second(s).</uib-progressbar>
+  </div>
+
+</script>
+<script type="text/ng-template" id="timedout-dialog.html">
+  <div class="modal-header">
+   <h3>You've Timed Out! Please login again.</h3>
+  </div>
+  <div ng-if="!isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logout"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+
+ <div ng-if="isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logoutSupplier"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+ 
+
+</script>
+<style>
+.dropdown_ld {
+	height: 10%;
+	overflow-y: auto;
+	border:1px solid #ccc;
+	 margin-bottom: 2%;
+}
+
+.dropdown_ld ul li {
+	list-style-type: none;
+}
+</style>

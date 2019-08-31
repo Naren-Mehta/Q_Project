@@ -1,0 +1,1178 @@
+
+<div class="background-static"></div>
+<div class="ContentMainContainer containerHomeHeader"  style="position: fixed; width: 100%; z-index: 1;">
+	<h3 class="containerHomeHeaderheadings">
+
+		<a ng-click="redirect()" class="HomeIconForStore"><i
+			class="fa fa-home" aria-hidden="true" style="margin-left: 7%;"></i></a>
+	</h3>
+	<h4 class="containerHomeHeaderheadings containerHomeHeaderheadingsFont">
+		<a ng-click="redirect()" class=" HomeIconForStore">Home</a>&nbsp;&nbsp;>
+	</h4>
+
+	<h5 class="containerHomeHeaderheadings containerMiniHeaderheadingsFont">Bale
+		Pickup</h5>
+	<h5 class="containerHomeHeaderheadings"></h5>
+	<!-- <div class="storeManagementMain">
+		<i class="fa fa-search storeManagementSearch " aria-hidden="true"></i>
+		<input ng-show="balePickupTab" type="search" tabindex="2"
+			ng-model="balePickupSearch"
+			ng-change="onSearchPickupData(balePickupSearch)"
+			ng-model-options='{ debounce: 1000 }' class="searchStoreManagement"
+			title="Search By Buy Customer, Store Name, Sell Customer, Sell Customer Location , Material Profile, Bales Picked, Bales Remaining,Supplier Name,Driver Name,Incident,Comments">
+
+		<input ng-show="pendingStoreReportTab" type="search" tabindex="2"
+			ng-model="pendingReportSearch" class="searchStoreManagement"
+			title="Search By Buy Customer, Store Name, Supplier Name, Frequency"
+			ng-change="onPendingReportSeach(pendingReportSearch)"
+			ng-model-options='{ debounce: 1000 }'>
+	</div>
+	<span class="searchText" >Search</span> -->
+</div>
+
+<!-- <br><br><br>// commented by me on 27/02/2019 -->
+
+<div class="ContentMainContainer">
+	<div class="custom_tab">
+		<div class="tab_heading">
+			<ul>
+				
+				<li  ng-class="{active: $route.current.activetab == 'balePickupTab'}" ng-if="!isSupplierRole"><a tabindex="3" href="#/balepickup" 
+					ng-click="balePickupTab=true;pendingStoreReportTab=false;" class="tabsIndexValue">Pickup
+						Data Summary</a></li>
+				<li  ng-class="{active: $route.current.activetab == 'balePickupTab'}" ng-if="isSupplierRole"><a tabindex="3" href="#/balepickupForSupplier" 
+					ng-click="balePickupTab=true;pendingStoreReportTab=false;" class="tabsIndexValue">Pickup
+						Data Summary</a></li>		
+				<li  ng-class="{active: $route.current.activetab == 'pendingStoreReportTab'}" ng-if="!isSupplierRole"><a tabindex="4" href="#/pendingStoreReportTab"
+					ng-click="pendingStoreReportTab=true;balePickupTab=false;" class="tabsIndexValue">PENDING
+						STORE REPORT</a></li>
+				<li  ng-class="{active: $route.current.activetab == 'pendingStoreReportTab'}" ng-if="isSupplierRole"><a tabindex="4" 
+					href="#/balepickupForPendingSupplier"
+					ng-click="pendingStoreReportTab=true;balePickupTab=false;" class="tabsIndexValue">PENDING
+						STORE REPORT</a></li>
+			</ul>
+		</div>
+		<div class="containerNotRequired">
+			<div class="tab_panelNotRequired" ng-show="balePickupTab">
+				<div class="filter-frequency">
+					<div class="filter-block1">
+						<div class="form-field mr10 dropDownWidthOut">
+							<label class="select_label"> <span>Buy Customer</span>
+							</label> <select class="select-field h56 selectTabIndexValue" tabindex="5"
+								ng-model="buyCustomerSelectedBP"
+								ng-change="getFilteredValuesBP(buyCustomerSelectedBP,supplierSelectedBP)" style="width: 100%;">
+								<option value="">Please Select</option>
+							<option ng-repeat="customer in buyCustomers | orderBy: 'customerName'" value='{{customer}}'>{{customer.customerName}}</option>
+							</select>
+						
+							</div>
+						
+						
+						
+
+						<div class="form-field mr10 dropDownWidthOut" style="width:26%">
+							<label class="select_label"> <span>Supplier </span>
+
+							</label> <select class="selectTabIndexValue select-field h56" ng-model="supplierSelectedBP" tabindex="6"
+								ng-readonly="true" ng-disabled="isSupplierRole"
+								ng-change="getFilteredValuesBP(buyCustomerSelectedBP,supplierSelectedBP)" style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="supplier in suppliersForCustomerSelected | orderBy: 'description'" value='{{supplier}}'>{{supplier.description}}</option>
+							</select>
+						</div>
+						
+						
+						<div class="spinner-overlay" ng-show="loaderBalePickup"
+							style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+
+							</div>
+						</div>
+						<div class="form-field mr10 dateDropdownIn">
+							<label class="select_label"> <span>Start Date</span><span  style="color:red">{{invalidBaleStartDateError}}</span></label>
+							</label>
+							<div class="input-group date-field" ng-click="StartDateFun();StartDateFun_tabindex()" ng-keydown="$event.keyCode === 13 && StartDateFun();StartDateFun_tabindex()">
+								<input ng-paste="$event.preventDefault()" tabindex="7" type="text" ng-model="startDate" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$" 
+									class="selectTabIndexValue selectTabIndexValue1 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched ng-dirty"
+									placeholder="Start Date" datepicker-append-to-body="true"  id="startDateval"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="StartDate.opened"
+									show-button-bar="false"
+									date-ng-click="updateme()"									
+									datepicker-options="startDateOptionsBalePickup"
+									close-text="Close" ng-click="StartDateFun();StartDateFun_tabindex()" ng-change="dateValidation();" ng-keydown="$event.keyCode === 13 && StartDateFun();StartDateFun_tabindex()" ng-blur="checkFromDateValidation()"> <i
+									class="dte-icon glyphicon glyphicon-calendar"
+									style="font-size: 25px;"></i>
+							</div>
+						</div>
+						<div class="form-field mr10 dateDropdownIn">
+							<label class="select_label"> <span>End Date</span><span  style="color:red">{{invalidBaleEndtDateDateError}}</span>
+							</label>
+							<div class="input-group date-field" ng-click="EndDateFun();EndDateFun_tabindex()" ng-keydown="$event.keyCode === 13 && EndDateFun();EndDateFun_tabindex()">
+								<input ng-paste="$event.preventDefault()" tabindex="8" type="text" ng-model="endDate" ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$" 
+									class="selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched" 
+									ng-keydown="$event.keyCode === 13 && EndDateFun();EndDateFun_tabindex()"
+									placeholder="End Date" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="EndDate.opened"
+									show-button-bar="false" id="endDateval"
+									datepicker-options="endDateOptionsBalePickup"
+									close-text="Close" ng-click="EndDateFun();EndDateFun_tabindex()" ng-change="dateValidation();" 
+									ng-blur="checkToDateValidation()"> <i
+									class="dte-icon glyphicon glyphicon-calendar"
+									style="color: green; font-size: 25px;"></i>
+							</div>
+						</div>
+
+
+						<div class="form-field mr10 submiticon">
+							<button tabindex="9" class="selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2 btn btn-field btn-green iconcolor" title="Go" data-toggle="tooltip"
+								ng-click="getBalePickups(buyCustomerSelectedBP,supplierSelectedBP, startDate,endDate);submitButton_Tabindex();removeInputValueBalePickup()"
+								ng-keydown="$event.keyCode === 13 && submitButton_Tabindex()"
+								 >
+								Submit</button>
+						</div>
+						<div class="form-field mr10 submiticon refreshButtonAlign" >
+							<img src="/brta/app/ui/resources/images/refresh.png" tabindex="10" 
+								ng-disabled="disableSubmitBtn" title="Reset"
+								ng-click="resetBalePickupFilter()" style="height: 94%;" ng-keydown="$event.keyCode === 13 && resetBalePickupFilter()" class="refreshTooltip selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2" data-toggle="tooltip">
+
+						</div>
+						
+						<div class="form-field mr0 pull-right" style="margin-top: 3%;" >
+							<a class="reportwith" ng-click="downloadBalePdf()" ng-keydown="$event.keyCode === 13 && downloadBalePdf()" > <img
+								src="/brta/app/ui/resources/images/new_pdf.png"
+							 data-toggle="tooltip"	title="Download Pdf" class="pdfTooltip selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2" tabindex="11">
+
+							</a> 
+							<a excel-export export-data="exportDatax" file-name="{{fileName}}" class="reportwith" class="form-btn " id="excelDownload"  ng-keydown="$event.keyCode === 13 && executeExcel()" ng-if="exportDatax!=undefined && exportDatax.length>0">
+
+						</a>
+						<span title="Download Excel" data-toggle="tooltip">
+							 <a class="reportwith" 
+								ng-if="!(exportDatax!=undefined && exportDatax.length>0)"
+								class="form-btn" > <img tabindex="12"
+								src="/brta/app/ui/resources/images/new_excel.png" class="selectTabIndexValue selectTabIndexValue1 selectTabIndexValue2" >
+							</a>
+						</span>
+						
+						</div> 	
+					</div>
+				</div>
+
+
+				<div class="filter-block">
+					<div class="form-inline">
+
+						<button type="button" tabindex="13" class="btn btn_green selectTabIndexValueForUpload selectTabIndexValue1 selectTabIndexValue2"
+							ng-click="adddatabalepickup();assignTabIndexBalePickup()" title="Add Driver Pickup Data" data-toggle="tooltip"  >
+							<i class="fa fa-plus" aria-hidden="true"></i> Add Driver Pickup
+							Data
+						</button>
+
+						<input type="file" tabindex="14" id="uploadCaptureInputFile" name="file"
+							class="form-control selectTabIndexValueForUpload selectTabIndexValue1 selectTabIndexValue2" accept=".xlsx"
+							onchange="angular.element(this).scope().uploadFile(this.files)" />
+
+						<button type="button" tabindex="15" class="btn btn_green selectTabIndexValueForUpload selectTabIndexValue1 selectTabIndexValue2"
+							ng-click="ParseExcelDataAndSave()"
+							ng-disabled="!selectedFileForUpload"  data-toggle="tooltip" title="Upload">
+							<i class="fa fa-upload" aria-hidden="true"></i> Upload
+						</button>
+
+						
+						<a href="sampleExcelDownload">
+						<button type="button" class="btn btn_green selectTabIndexValueForUpload selectTabIndexValue1 selectTabIndexValue2" tabindex="16"
+							data-toggle="tooltip" title="Sample">
+							<i class="fa fa-download" aria-hidden="true" ></i> Sample
+						</button>
+						</a>
+						
+						
+						
+						
+						<div ng-repeat="message in uploadExcelMessage">
+					<span style="color: red; font-style: italic; font-size: 14px;"> {{message}}</span>
+					</div>
+					</div>
+					</div>
+					
+					
+					
+				<div class="spinner-overlay" ng-show="loaderActiveBalePickup"
+					style="padding-bottom: 20px">
+					<div class="loader-inner">
+						<i class="fa fa-spin fa-circle-o-notch"></i> Loading...
+
+					</div>
+				</div>
+		<div class="custom_table incpic scroll-table table-scroll table-responsive"  ng-if="authorizedBalePickup" >
+		
+		<table id="balePickupSummaryDetails" dt-instance="dtInstance"
+						 datatable="" dt-options="dtOptionsBalePickup"
+						 dt-columns="dtColumnsBalePickup" 
+						class="datatable resource-table" cellspacing="0" width="100%" ng-init="addTabIndex()"> 
+						</table> 
+		</div>
+		<div class="custom_table incpic scroll-table table-scroll table-responsive" ng-if="!authorizedBalePickup" >
+			
+					<table id="balePickupSummaryDetailsEmpty"  ng-if="!authorizedBalePickup"  datatable="" dt-options="dtOptionsemptyBalePickup"
+						class="datatable resource-table" cellspacing="0" width="100%" ng-init="addTabIndex()">
+						<thead>
+							<tr>
+								<th>Buy Customer</th>
+								<th>Store Name</th>
+								<th>Pickup Date</th>
+								<th>Sell Customer</th>
+								<th>Sell Customer Location</th>
+								<th>Delivery Date</th>
+								<th>Release Number</th>
+								<th>Destination Gross</th>
+								<th>Destination Tare</th>
+								<th>Material Profile</th>
+								<th>Bales Picked</th>
+								<th>Bales Remaining</th>
+								<th>Supplier Name</th>
+
+								<th >Driver Name</th>
+
+								<th >Incident</th>
+								<th >Comments</th>
+								<th >Incident Picture</th>
+								<th >Edit</th>
+							</tr>
+						</thead>
+
+					
+					</table>
+
+
+				</div>	
+				
+				
+				
+				
+				</div>
+			
+
+
+			<div class="tab_panelNotRequired" ng-show="pendingStoreReportTab">
+				<div class="filter-frequency">
+					<div class="filter-block1">
+
+						<div class="form-group">
+							<div class="form-field mr10 dropDownWidthOut">
+								<label class="select_label "><span>Buy Customer</span></label>
+								<select class="selectTabIndexValue select-field h56 " tabindex="5"
+									ng-model="buyCustomerSelectedPR" ng-change="getFilteredValuesBP(buyCustomerSelectedPR,supplierSelectedPR);checkSubmitBtn();" style="width: 100%;">
+								<option value="">Please Select</option>
+							<option ng-repeat="customer in buyCustomers | orderBy: 'customerName'" value='{{customer}}'>{{customer.customerName}}</option>
+							</select>
+						
+							</div>
+						
+							<div class="form-field mr10 dropDownWidthOut" style="width:26%">
+
+								<label class="select_label "><span>Supplier</span></label> <select tabindex="6"
+									class="selectTabIndexValue select-field h56" ng-model="supplierSelectedPR" ng-disabled="isSupplierRole"
+									ng-change="getFilteredValuesBP(buyCustomerSelectedPR,supplierSelectedPR); checkSubmitBtn();" style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="supplier in suppliersForCustomerSelected | orderBy: 'description'" value='{{supplier}}'>{{supplier.description}}</option>
+							</select>
+						</div>
+							
+							
+							
+							<div class="spinner-overlay" ng-show="loaderPendingReport"
+								style="padding-bottom: 20px">
+								<div class="loader-inner">
+									<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+								</div>
+							</div>
+
+							<div class="form-field mr10 submiticon ">
+								<button class="selectTabIndexValue btn btn-field btn-green  iconcolor" tabindex="7"
+									ng-disabled="disableSubmitBtnPR" title="Go"
+									ng-click="getPendingBalePickups(buyCustomerSelectedPR,supplierSelectedPR);removeInputValueBalePending()" ng-keydown="$event.keyCode === 13 " data-toggle="tooltip">
+									Submit</button>
+							</div>
+							<div class="form-field mr10 submiticon refreshButtonAlign" >
+								<img src="/brta/app/ui/resources/images/refresh.png" tabindex="8"
+									ng-disabled="disableSubmitBtnPR"
+									ng-click="resetPendingReportFilters()" title="Reset"  data-toggle="tooltip" ng-keydown="$event.keyCode === 13 && resetPendingReportFilters()"
+									style="height: 94%;" class="refreshTooltip selectTabIndexValue">
+
+							</div>
+
+
+							<div class="form-field mr0 pull-right" style="margin-top: 3%;">
+								<a class="reportwith" ng-click="downloadPendingStorePdf()" ng-keydown="$event.keyCode === 13 && downloadPendingStorePdf()" >
+
+									<img src="/brta/app/ui/resources/images/new_pdf.png"
+									title="Download Pdf" data-toggle="tooltip" tabindex="9" class="pdfTooltip selectTabIndexValue">
+
+								</a> 
+								<a excel-export export-data="exportDatay" file-name="{{fileName}}" class="reportwith" class="form-btn " id="excelDownload_pending"  ng-keydown="$event.keyCode === 13 && executeExcel_pending()" ng-if="exportDatay!=undefined && exportDatay.length>0"></a>
+
+								<span title="Download Excel" data-toggle="tooltip">
+								<a class="reportwith selectTabIndexValue" tabindex="10"
+									ng-if="!(exportDatay!=undefined && exportDatay.length>0)"
+									class="form-btn" > <img
+									src="/brta/app/ui/resources/images/new_excel.png"	>
+								</a>
+							</span>
+						
+								<!-- <span title="Download Excel" data-toggle="tooltip">
+								<a class="reportwith " ng-disabled="isExport"  
+									ng-if="jsonForPendingReportExport!=undefined && jsonForPendingReportExport.length>0"
+									class="form-btn" 
+									ng-csv="jsonForPendingReportExport"
+									csv-header="['Buy Customer','Store Name','Frequency','Supplier Name','Last Pickup Date']"
+									filename="Pending Store.csv" ng-keydown="$event.keyCode === 13 && executeExcel_pending()" id="excelDownload_pending">
+									 <img tabindex="10" title="Download Excel" data-toggle="tooltip"
+									src="/brta/app/ui/resources/images/new_excel.png"
+									 class="selectTabIndexValue">
+								</a > 
+							</span>
+								<span title="Download Excel" data-toggle="tooltip">
+								<a class="reportwith selectTabIndexValue" tabindex="10"
+									ng-if="!(jsonForPendingReportExport!=undefined && jsonForPendingReportExport.length>0)"
+									class="form-btn" > <img
+									src="/brta/app/ui/resources/images/new_excel.png"	>
+								</a>
+							</span> -->
+							</div> 
+
+
+						</div>
+					</div>
+				</div>
+
+
+				<div class="custom_table scroll-table table-scroll" ng-if="authorizedPR">
+	
+	
+		 <table id="pendingStoreReportDataTable"  dt-instance="dtInstance"
+						 datatable="" dt-options="dtOptionsPR"
+						 dt-columns="dtColumnsPR" 
+						class="datatable resource-table" cellspacing="0" width="100%"> 
+						</table> 
+		</div>
+		<div class="custom_table scroll-table table-scroll"  ng-if="!authorizedPR"  >
+			<table id="pendingStoreReportDataTable"  cellspacing="0" width="100%">
+					
+						<thead>
+							<tr class="table_form form-field nowrap">
+
+								<th class="tr_width">Buy Customer</th>
+								<th class="tr_width">Store Name</th>
+								<th class="tr_width">Frequency</th>
+								<th class="tr_width">Supplier Name</th>
+								<th class="tr_width">Last Pickup Date</th>
+								<th class="tr_width">Resolve</th>
+
+							</tr>
+						</thead>
+						
+					</table>
+				</div>
+
+
+			</div>
+
+
+
+		</div>
+
+
+
+
+		<div class="set-data-popup popup_overlay fadein"
+			ng-show="addEditDriverPopup===true">
+
+			<div class="popup_content setdata-scroll">
+				<div class="popup-header">
+					<button type="button" class="close close_Button"
+						ng-click="balePickupPopupClose();assignTabIndexclose();assignbackIndexValue()" >
+						<img src="/brta/app/ui/resources/images/close_btn.png" tabindex="40">
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						<b>{{isEdit?"Edit":"Add"}} Driver Pickup Data</b>
+					</h4>
+					<div class="alert" ng-show="errorFlag">Please provide a Store
+						Start Date</div>
+				</div>
+				<div class="popup-body ">
+					<div class="scroll-popup">
+						<div class="container containerWithoudPadding" tabindex="">
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer "	style="padding: 0px 15px; ">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Buy Customer</b><span
+													ng-if="!editPickupData.buycustomerName"
+													ng-show="editPickupData.error.buycustomerNameError"
+													style="color: red;"> Please select Buy Customer. </span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter ">
+												<ui-select ng-model="editPickupData.buycustomerName" class="addDriverIndexValue1" tabindex="21" 
+													search-enabled="true" ng-disabled="disableBuyCustomerName" theme="bootstrap" id="prema" on-select="getSellCustomer($item); getCustomerSite($item); getServiceChannelWorkOrder()" autofocus> <ui-select-match
+													placeholder="Select ">{{$select.selected.customerName}}</ui-select-match>
+												<ui-select-choices repeat="buyCustomer in buyCustomers |orderBy:'customerName' | filter:{customerName: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												<div
+													on-select="getSellCustomer(buyCustomer); getCustomerSite(buyCustomer); getServiceChannelWorkOrder();">
+													<div>{{buyCustomer.customerName}}</div>
+												</ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer "	style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Store Name*</b> <span ng-if="!editPickupData.storeName"
+													ng-show="editPickupData.error.storeNameError"
+													style="color: red;"> Please select Store Name </span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter ">
+												<ui-select ng-model="editPickupData.storeName" tabindex="22"   class="addDriverIndexValue2"
+													search-enabled="true"  ng-disabled="disableStoreName" theme="bootstrap"
+													on-select="getSuppliersFromCustomerSite($item); getMatrialsForCustomerSiteId($item); getServiceChannelWorkOrder() "> <ui-select-match
+													placeholder="Select ">{{$select.selected.siteName}}</ui-select-match>
+												<ui-select-choices
+													repeat="balepickuplist in getCustomerSiteFromBuyCustomerSite | orderBy : 'siteName' | filter: {siteName: $select.search}" 
+													class="flexcroll" style=" width: 60% !important;">
+												<div
+													on-select="getSuppliersFromCustomerSite(balepickuplist); getServiceChannelWorkOrder(); getMatrialsForCustomerSiteId(balepickuplist)">{{balepickuplist.siteName}}
+												</div>
+												<label for="balepickuplist{{$index}}"></label> </ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+			
+						
+
+
+						<div class="container containerWithoudPadding">
+							<div
+								class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Material Profile*</b><span
+													ng-if="!editPickupData.materialprofile"
+													ng-show="editPickupData.error.materialprofileError"
+													style="color: red;"> Please select Material Profile.
+												</span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter">
+												<ui-select ng-model="editPickupData.materialprofile" tabindex="23"
+													search-enabled="true" theme="bootstrap"  class="addDriverIndexValue3"
+													> <ui-select-match
+													placeholder="Select ">{{$select.selected.description}}</ui-select-match>
+												<ui-select-choices
+												repeat="balepickuplist in getMaterialDetailsByMaterialID  | orderBy : 'description' | filter:{description: $select.search}"
+												class="flexcroll" style=" width: 60% !important;">
+
+												<div>{{balepickuplist.description}}</div>
+												</ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<div
+								class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer "
+									style="padding: 0px 15px; margin-top: 8px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Bales Picked*</b> <span
+													ng-show="editPickupData.error.invalidMaterialPickedWeightError"
+													style="color: red;"> Bales Picked Quantity Required
+													(0 or greater) </span> <span
+													ng-if="!editPickupData.materialPickedWeight"
+													ng-show="editPickupData.error.materialPickedWeightError"
+													style="color: red;"> Bales Picked Quantity cannot be
+													empty.</span>
+											</h5>
+											<div class="commentAlignment">
+												<input only-numeric type="text" tabindex="24" id="balespickedCount"
+													class="form-control addDriverIndexValue4 Inputwidth input-field bordercolorG "
+													limit-to="4" maxlength="4"
+													ng-model="editPickupData.materialPickedWeight"
+													placeholder="Quantity">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="container containerWithoudPadding"
+							style="border-bottom: 1px solid #DADCDD; padding-bottom: 0px;">
+							<div class="col-md-6 col-lg-6">
+								<div lass="popup-layer ">
+									<h5 class="popUpHeadingh6">
+										<b>Pickup Date*</b>
+										<span ng-if="invalidBalePickupStartDateError" style="color:red">{{invalidBalePickupStartDateError}}</span>
+										<span
+											ng-if="!editPickupData.startDateBalePickup"
+											ng-show="editPickupData.error.startDateBalePickupError"
+											style="color: red;"> Please select Pickup Date</span> </b>
+									</h5>
+										<div class="form-field mr10">
+											<label class="select_label setPopUpDateAlign" style="border: none;">
+												<div class="input-group date-field" style="width: 90%;" 
+													ng-click="StartDateBalePPickopupFun()" ng-keydown="$event.keyCode === 13 && StartDateBalePPickopupFun()">
+													<input type="text" tabindex="25"
+														style="padding: 10px !important; height: 30px;margin-top: 0px;    height: 34px;z-index: -1;"
+														ng-model="editPickupData.startDateBalePickup"
+														ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+														id="startDate_popup" ng-paste="$event.preventDefault()"
+														class="form-control bordercolorG  addDriverIndexValue4 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+														placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+														uib-datepicker-popup="MM-dd-yyyy"
+														is-open="StartDateBalePickup.opened"
+														show-button-bar="false"
+														datepicker-options="dateOptionsStart" close-text="Close"
+														ng-click="StartDateBalePPickopupFun();" ng-keydown="$event.keyCode === 13 && StartDateBalePPickopupFun()"
+														ng-change="dateValidationBalePickupPopup();getServiceChannelWorkOrder();"
+														ng-blur="checkValidPopupstartDate()"> <i
+														class="date-icon glyphicon glyphicon-calendar"
+														style="top: 11%; padding: -1px !important;top: 15%;"></i>
+												</div>
+											</label>
+										</div>
+								</div>
+							</div>
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer "
+									style="padding: 0px 15px; border-bottom: 1px solid #FFFFFF; margin-top: 8px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Bales Remaining*</b><span
+													ng-show="editPickupData.error.invalidBalesRemainingError"
+													style="color: red;"> Bales Remaining Quantity
+													Required (0 or greater) </span> <span
+													ng-if="!editPickupData.balesRemaining"
+													ng-show="editPickupData.error.balesRemainingError"
+													style="color: red;"> Bale Remaining Quantity cannot
+													be empty.</span>
+											</h5>
+											<div class="commentAlignment">
+												<input only-numeric type="text" tabindex="26" id="balesremainingCount" maxlength="4"
+													class="form-control addDriverIndexValue4 Inputwidth input-field bordercolorG "
+													limit-to="4" ng-model="editPickupData.balesRemaining"
+													placeholder="Quantity">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="container containerWithoudPadding">
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Supplier Name*</b> <span
+													ng-if="!editPickupData.supplierName"
+													ng-show="editPickupData.error.supplierNameError"
+													style="color: red;"> Please select Supplier Name </span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter">
+												<ui-select ng-model="editPickupData.supplierName" class="addDriverIndexValue4" tabindex="27"
+													ng-disabled="isSupplierRole" search-enabled="true"
+													theme="bootstrap" 
+													on-select="updatebalePickupDriver($item); getSellCustFromBuyCustAndSupp($item)"> <ui-select-match
+													placeholder="Select ">{{$select.selected.description}}</ui-select-match>
+												<ui-select-choices
+													repeat="balepickuplist in allSupplierFromCustomerSite | orderBy : 'description' | filter:{description: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												<div on-select="updatebalePickupDriver(balepickuplist);getSellCustFromBuyCustAndSupp(balepickuplist)">{{balepickuplist.description}}
+												</div>
+												<label for="balepickuplist{{$index}}"></label> </ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+
+
+							</div>
+							<div
+								class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Driver Name*</b> <span
+													ng-if="!editPickupData.driverNames"
+													ng-show="editPickupData.error.driverNamesError"
+													style="color: red;"> Please select Driver Name </span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter">
+												<ui-select ng-model="editPickupData.driverNames" tabindex="28"
+													search-enabled="true" theme="bootstrap" class="addDriverIndexValue4"> <ui-select-match
+													placeholder="Select ">
+												{{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
+												<ui-select-choices
+													repeat="supDriver in drivers | orderBy:'lastName' | filter:{lastName: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												<div>{{supDriver.firstName}} {{supDriver.lastName}}</div>
+												<label for="driver{{$index}}"></label> </ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+
+
+							</div>
+						</div>
+
+
+						<div class="container containerWithoudPadding">
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+								<div class="popup-layer "
+									style="padding: 0px 15px; border-bottom: 1px solid #FFFFFF;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Incident</b>
+											</h5>
+											<div class="select-field serviceprovider-multifilter ">
+												<ui-select ng-model="editPickupData.Incidents" tabindex="29" class="addDriverIndexValue4"
+													search-enabled="true" theme="bootstrap"> <ui-select-match
+													placeholder="Select">{{$select.selected.incidentDescription}}</ui-select-match>
+												<ui-select-choices
+													repeat="incident in incidentTypeList | orderBy : 'incidentDescription' | filter:{incidentDescription: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												<div>{{incident.incidentDescription}}</div>
+												</ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b> Incident Picture</b>
+											 	<span
+													ng-if="!editPickupData.incidentImagesLength"
+													ng-show="editPickupData.error.incidentImagesLength"
+													style="color: red;"> Please select maximum 3 images </span>
+													
+													 <span
+													ng-if="!editPickupData.incidentExtension"
+													ng-show="editPickupData.error.incidentExtension"
+													style="color: red;"> Only image files are allowed. Example (bmp, jpg,jpeg etc..)
+													</span>
+											</h5>
+											<div class="commentAlignment">
+											
+												<input type='file' id="imageformat" ng-model='editPickupData.uploadIncidentFile' class="form-control addDriverIndexValue4" size="1"
+												tabindex="30"
+													accept="image/*" multiple base-sixty-four-input>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+
+
+						<div class="container containerWithoudPadding">
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Sell Customer </b> <span
+													ng-if="!editPickupData.sellCustomer"
+													ng-show="editPickupData.error.sellCustomerError"
+													style="color: red;"> Please select Sell Customer </span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter ">
+												<ui-select ng-model="editPickupData.sellCustomer" tabindex="31"
+													theme="bootstrap" class="addDriverIndexValue4" search-enabled="true"
+													on-select="getSaleCustomerLocation($item)"> <ui-select-match
+													placeholder="Select ">{{$select.selected.customerName}}</ui-select-match>
+												<ui-select-choices
+													repeat="balepickuplist in sellCustomersForCustomerSelected | orderBy:'customerName' | filter:{customerName: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												<div on-select="getSaleCustomerLocation(balepickuplist)">{{balepickuplist.customerName}}
+												</div>
+												<label for="balepickuplist{{$index}}"></label> </ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+
+
+
+							<div
+								class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Sell Customer Site</b> <span
+													ng-if="!editPickupData.sellCustomerSite"
+													ng-show="editPickupData.error.sellCustomerSiteError"
+													style="color: red;"> Please select Sell Customer
+													Site</span>
+											</h5>
+											<div class="select-field serviceprovider-multifilter ">
+												<ui-select ng-model="editPickupData.sellCustomerSite" tabindex="32"
+													theme="bootstrap" search-enabled="true"
+													ng-disabled="!editPickupData.sellCustomer" class="addDriverIndexValue4"> <ui-select-match
+													placeholder="Select " class="save-changes">{{$select.selected.siteName}}</ui-select-match>
+												<ui-select-choices
+													repeat="balepickuplist in destinationSitesForDestinationSelected | orderBy:'siteName' | filter:{siteName: $select.search} "
+													class="flexcroll" style=" width: 60% !important;">
+												<div>{{balepickuplist.siteName}}</div>
+												<label for="balepickuplist{{$index}}"></label> </ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+
+
+
+							</div>
+						</div>
+						<div class="container containerWithoudPadding"
+							style="border-bottom: 1px solid #DADCDD; padding-bottom: 0px;">
+							<div class="col-md-6 col-lg-6">
+								<div lass="">
+									<h5 class="popUpHeadingh6">
+										<b>Delivery Date</b> 
+										<span style="color:red">{{invalidBaleEndDateError}}</span>
+										<span
+													ng-if="!editPickupData.deliveryDate"
+													ng-show="editPickupData.error.deliveryDateError"
+													style="color: red;"> Please select Delivery Date </span>
+									</h5>
+									<div class="form-field mr10">
+										<label class="select_label setPopUpDateAlign" style="border: none;">
+											<div class="input-group date-field" style="width: 90%;"
+												ng-click="EndDatePopupFun();" ng-keydown="$event.keyCode === 13 && EndDatePopupFun()">
+												<input type="text" tabindex="33" 
+													style="padding: 10px !important; height: 30px;margin-top: 0px;    height: 34px;z-index: -1;"
+													ng-model="editPickupData.deliveryDate"
+													ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+													ng-disabled="!editPickupData.sellCustomer"
+													id="endDate_popup" ng-paste="$event.preventDefault()"
+													ng-keydown="$event.keyCode === 13 && EndDatePopupFun()"
+													class="addDriverIndexValue4 bordercolorG save-changes input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+													placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+													uib-datepicker-popup="MM-dd-yyyy" ng-model="dtEnd"
+													is-open="EndDatePopup.opened" show-button-bar="false"
+													datepicker-options="dateOptionEnd" close-text="Close"
+													ng-click="EndDatePopupFun()" ng-change="dateValidationBalePickupPopup()" ng-blur="checkValidPopupEndDate();DeliveryPastDate()"> <i
+													class="dte-icon glyphicon glyphicon-calendar"
+													style="top: 11%; padding: -1px !important;top: 15%;"></i>
+											</div>
+										</label>
+									</div>
+								</div>
+							</div>
+							<div
+								class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer "
+									style="padding: 0px 15px; border-bottom: 1px solid #FFFFFF;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Release Number</b> <span
+													ng-if="!editPickupData.releaseNoselected"
+													ng-show="editPickupData.error.releaseNoselectedError"
+													style="color: red;"> Please select Release Number </span>
+											</h5>
+											<div class=" commentAlignment">
+
+												<input type="text" tabindex="34" id="releaseNumberCount"
+													ng-disabled="!editPickupData.sellCustomer"  limit-to="20" maxlength="20"
+													class="form-control  addDriverIndexValue4 Inputwidth input-field bordercolorG  ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched "
+													 ng-pattern-restrict="^[A-Za-z0-9-]*$"
+																		
+													ng-model="editPickupData.releaseNoselected"
+													placeholder=" Release Number">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="container containerWithoudPadding " >
+						<div
+							class=" col-md-6 col-lg-6  popupHeaderDate popupLayerWithoutPadding"  >
+							<div class="popup-layer " style="padding: 0px 15px;">
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+										<h5 class="popUpHeadingh6">
+											<b> Comment</b>
+										</h5>
+										<div class="commentAlignment">
+
+
+											<!-- <input limit-to="140" type="text" class="Inputwidth input-field bordercolorG set-data-input-height ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched" ng-model="editPickupData.commentsselected" placeholder=" Comment here"> -->
+											<textarea ng-model="editPickupData.commentsselected" id="commentCount" style="height: 34px;" 
+												class="set-data-input-height addDriverIndexValue4 form-control bordercolorG Inputwidth input-field bordercolorG  ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched"
+												rows="2" cols="50" id="comment" placeholder="Type Comments"
+		maxlength="140" tabindex="35" pattern="^[A-Za-z\d_@.#$=!%^)(\]:\*;\?\/\,}{'\|`~\x22\\\s[&\+-]*$"
+												 ng-pattern-restrict ></textarea>
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>BOL/Ticket No</b> <span
+													ng-if="!( editPickupData.bOL1<1)"
+													ng-show="editPickupData.error.bolError"
+													style="color: red;"> BOL/Ticket No is required and should be greater than 0.</span>
+											</h5>
+											<div class="commentAlignment">
+												<input only-numeric type="text" maxlength="9" id="bolCount"  ng-disabled="scWorkOrder"
+													class="form-control  addDriverIndexValue4 Inputwidth input-field bordercolorG  ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched"
+													ng-model="editPickupData.bOL" placeholder="BOL/Ticket No" tabindex="36">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+							<div class="container containerWithoudPadding " >
+									<div
+										class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+										<div class="popup-layer " style="padding: 0px 15px;">
+											<div
+												class="select-drive-name checkbox-position border-removesuppliersite">
+												<div class="inner-content box-align-provider">
+													<h5 class="popUpHeadingh6">
+														<b>Gross Weight</b> <span
+													ng-if="!editPickupData.grossWeight"
+													ng-show="editPickupData.error.grossWeightError"
+													style="color: red;"> Please enter Gross Weight</span>
+													<span
+															ng-show="editPickupData.error.invalidGrossWeightError"
+															style="color: red;"> Gross Weight should greater
+															than Tare Weight</span>
+													</h5>
+													<div class="commentAlignment">
+														<input ng-disabled="!editPickupData.sellCustomer" tabindex="37" 
+															only-numeric  type="text"  maxlength="8" id="grossCount"
+															class="form-control  addDriverIndexValue5 Inputwidth input-field bordercolorG  ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched "
+															ng-model="editPickupData.grossWeight"
+															placeholder="Gross Weight">
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+
+							<div
+								class="col-md-6 col-md-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer " style="padding: 0px 15px;">
+									<div
+										class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Tare Weight</b><span
+													ng-if="!editPickupData.tareWeight"
+													ng-show="editPickupData.error.tareWeightError"
+													style="color: red;"> Please enter Tare Weight</span>
+											</h5>
+											<div class="commentAlignment">
+												<input ng-disabled="!editPickupData.sellCustomer"
+													only-numeric type="text" maxlength="8" id="tareCount"
+													class="form-control  addDriverIndexValue5 Inputwidth input-field bordercolorG  ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched"
+													ng-model="editPickupData.tareWeight"
+													placeholder="Tare Weight" tabindex="38">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+						<!--end by deepak-->
+						<div class="popup-footer">
+							<div class="popup-layer pull-left borderbottomremv"></div>
+							<!--class="btn assign_btn  btn-primary floatright"-->
+							<button type="button"
+								class="addDriverIndexValue5 btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom saveButtonAlign"
+								ng-click="editBalePickup();assignTabIndexclose();assignbackIndexValue()"
+								ng-disabled="setDataApplyBtn_{{customerSiteIdForBtn}}" tabindex="39">
+
+								Save</button>
+								<!--<span ng-repeat="n in [] | range:100" tabindex="{{ $index*1 + 50 }}" tabindex="50">{{}}</span>-->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="modal popup_overlay assign-activity-popup" id="myModal"
+		style="display: block;" ng-if="pendingResolutionAction" >
+		<div class="modal-dialog" style="width: 40%">
+			<!--inside contents-->
+			<div class="modal-content inner-content">
+				<!--header-->
+				<div class="modal-header inner-header">
+					<div class="inner-header-left">
+						<div class="custom-inner-c">
+							<h2>Pending Resolution Action</h2>
+						</div>
+					</div>
+					<div class="inner-header-right">
+						<img src="/brta/app/ui/resources/images/close_btn.png"
+							ng-click="pendingResolutionActionClose();assignTabIndexclose();assignbackIndexValue()" />
+					</div>
+				</div>
+				<!--body-->
+				<div class="inner-body">
+					<div class="container containerWithoudPadding"
+						style="border-bottom: 1px solid #FFF;">
+						<div
+							class="col-md-12 col-lg-12 popupHeaderDate popupLayerWithoutPadding">
+
+							<div class=""
+								style="padding: 0px 15px; border-bottom: 1px solid #FFFFFF;">
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+										<h5 class="popUpHeadingh6">
+											<b>Supplier Name</b>
+										</h5>
+
+										<div class="select-field serviceprovider-multifilter ">
+											<!--<select class="select-field h56 form-control" readonly tabindex="21" 
+												ng-model="pendingResolutionPopUp.supplierSelected"
+												ng-disabled="isSupplierRole"
+												ng-options="supplier.description for supplier in suppliersForCustomerSelected | orderBy : 'description'"
+												style="padding: 2%; border: 1px solid #ccc; background-color: #FFF;">
+												<option value="">Please Select</option>
+											</select>-->
+											
+											<ui-select readonly tabindex="21" 
+												ng-model="pendingResolutionPopUp.supplierSelected"
+												ng-disabled="isSupplierRole"
+													theme="bootstrap" > <ui-select-match
+													placeholder="Please Select">{{$select.selected.description}}</ui-select-match>
+
+												<ui-select-choices tabindex="6" class="selectTabindex_popup endDateSetDataPopupFun_TabIndex"
+													repeat="supplier in suppliersForCustomerSelected | orderBy:'description' | filter:{description: $select.search}"
+													class="flexcroll" style=" width: 80% !important;">
+												<div ng-click="">{{supplier.description}}
+												</div>
+												<label for="description{{$index}}"></label> </ui-select-choices> </ui-select>
+
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="container containerWithoudPadding"
+						style="border-bottom: 1px solid #FFFFFF; padding-bottom: 10px;">
+						<div class="col-md-12 col-lg-12">
+							<div lass="popup-layer ">
+								<h5 class="popUpHeadingh6">
+									<b> Date of Resolution * <span ng-if="noPickupDetailsFoundErrorMessege"
+										style="color: red">No pickup details found with this
+											pending report data.</span></b>
+								</h5>
+
+								<!--<select class="select-field h56 form-control" readonly tabindex="22" 
+									ng-model="pendingResolutionPopUp.pendingDetails"
+									ng-options="pendingReport.pickupDate for pendingReport in pendingReportDetails "
+									style="padding: 2%; border: 1px solid #ccc; background-color: #FFF;">
+									<option value="">Please Select</option>
+								</select>-->
+								
+								<ui-select readonly tabindex="22" 
+									ng-model="pendingResolutionPopUp.pendingDetails" ng-paste="$event.preventDefault()" 
+													theme="bootstrap"  ng-change="pendingReportPickupdate()"> <ui-select-match
+													placeholder="Please Select">{{$select.selected.pickupDate}}</ui-select-match>
+
+												<ui-select-choices tabindex="6" class="selectTabindex_popup endDateSetDataPopupFun_TabIndex"
+													repeat="pendingReport in pendingReportDetails  | filter:{pickupDate: $select.search}"
+													class="flexcroll" style=" width: 60% !important;">
+												<div ng-click="">{{pendingReport.pickupDate}}
+												</div>
+												<label for="pickupDate{{$index}}"></label> </ui-select-choices> </ui-select>
+
+							</div>
+						</div>
+					</div>
+					<div class="container containerWithoudPadding">
+						<div
+							class="col-md-12 col-lg-12 popupHeaderDate popupLayerWithoutPadding">
+
+							<div class="popup-layer "
+								style="padding: 0px 15px; border-bottom: 1px solid #FFFFFF;">
+								<div
+									class="select-drive-name checkbox-position border-removesuppliersite">
+									<div class="inner-content box-align-provider">
+										<h5 class="popUpHeadingh6">
+											<b>Comments</b>
+										</h5>
+
+										<div class="select-field serviceprovider-multifilter ">
+											<textarea ng-model="pendingResolutionPopUp.comment" tabindex="23" 
+												class="form-control textbox" rows="2" cols="50" id="comment"
+												placeholder="Type Comments" maxlength="140"></textarea>
+
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal-footer"
+						style="text-align: center; padding: 10px;">
+						<button type="button" tabindex="24" 
+							class="btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom assignimg-width"
+							ng-click="savePendingResolutionDetails();;assignTabIndexclose();assignbackIndexValue()"
+							ng-disabled="noPickupDetailsFound;" >
+							<!-- <img src="/brta/app/ui/resources/images/assign.png" alt="wrong path" title="Assign"> -->
+							<!-- <img src="/brta/app/ui/resources/images/assign.png" alt="wrong path" title="Assign"> -->
+							Save
+							
+						</button><span tabindex="25"></span><span tabindex="26"></span><span tabindex="27"></span><span tabindex="28"></span><span tabindex="29"></span><span tabindex="30"></span>
+					</div >
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+	<style type="text/css">
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+	.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover
+	{
+	background: #7AB708;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+	margin-top: 3%;
+}.no-footer.dataTables_wrapper div.dataTables_scrollHead table, .no-footer.dataTables_wrapper div.dataTables_scrollBody table{
+	margin :0;
+}
+.textbox:focus, .textbox:active, .textbox:hover{
+	border-color: #66afe9 !important;
+    outline: 0 !important;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6) !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6) !important;
+}
+.dataTables_scrollBody{
+	    overflow-y: hidden !important;
+}
+
+
+</style>
+
+
+	<script type="text/ng-template" id="warning-dialog.html">
+  <div class="modal-header">
+   <h3>Your session has been expired! Please login again.</h3>
+  </div>
+  <div idle-countdown="countdown" ng-init="countdown=5" class="modal-body">
+   <uib-progressbar max="5" value="5" animate="false" class="progress-striped active">You'll be logged out in {{countdown}} second(s).</uib-progressbar>
+  </div>
+
+</script>
+	<script type="text/ng-template" id="timedout-dialog.html">
+  <div class="modal-header">
+   <h3>You've Timed Out! Please login again.</h3>
+  </div>
+  <div ng-if="!isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logout"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+
+ <div ng-if="isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logoutSupplier"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+ 
+
+</script>

@@ -1,0 +1,74 @@
+
+<style type="text/css">
+	
+
+
+.container {
+   /* width: 1170px;*/
+   width: 100%;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+.form-control {
+    border-radius: 2px;
+    border: 1px solid #aaa;
+    border-top-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    box-shadow: none;
+    width: 65%;
+   
+}
+
+.headerContainer {
+    display: none;
+}
+.a1 {
+    display: none;
+    
+}
+.ContentFullContainer {
+    margin-top: 0%;
+}
+</style>
+
+
+
+
+<div class="container">
+	<div class="row">
+
+		<div class="col-md-6 col-lg-6 loginImageFirstDiv" >
+		<img src="/brta/app/ui/resources/images/content_BG.jpg" style="width: 100%;height: 100%;" 
+									  alt="wrong path">
+			
+		</div>
+
+		<div class="col-md-6 col-lg-6 " style="position: absolute;top: 30%;left: 50%">
+			  <h2>Sign In</h2>
+			  <h6>Welcome to the Bale Route Application</h6>
+			  <form >
+			  
+			 	
+
+			    <div class="form-group">
+			      <label for="email" class="loginInputLabel" style="top: 40%;left: 20px;">Email Id:</label>
+			      <input type="email" class="form-control loginInputInlineShow" ng-model="email" id="email" required>
+			    </div>
+			    <div class="form-group">
+			      <label for="pwd" class="loginInputLabel1" style="top: 60%;left: 20px;">Password:</label>
+			      <input type="password" class="form-control loginInputInlineShow" ng-model="phoneNumber" id="pwd" required >
+			    </div>
+
+			     <span  ng-if="errorMessage" style="color: red;">
+				  {{errorMessage}}
+				</span>
+
+
+			  <!--   <div><a >Forgot Password?</a></div> -->
+			    <button type="submit" ng-click="supplierLogin(email,phoneNumber)" class="btn btn-field btn-green iconcolor" style="margin-top: 1%;">Login</button>
+			  </form>
+		  </div>
+
+	  </div>
+</div>

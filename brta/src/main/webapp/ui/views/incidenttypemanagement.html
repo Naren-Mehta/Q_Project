@@ -1,0 +1,311 @@
+<style type="text/css">
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+	.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover
+	{
+	background: #7AB708;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+	margin-top: 3%;
+}
+table.dataTable tbody td {
+      padding: 5px;
+}
+.custom_table table tr td:first-child {
+    border-left: 1px solid #d3d3d3;
+    padding-left: 10px;
+    padding-top:0px;
+    padding-bottom: 0px;
+}
+.custom_table tr:nth-child(even) td {
+    background: #f1f1f1;
+    vertical-align: middle;
+}
+.custom_table tr:nth-child(odd) td {
+    background: #ffffff;
+    vertical-align: middle;
+}
+.custom_table th {
+	line-height: 1%;
+}
+</style>
+
+<div class="background-static"></div>
+<div class="ContentMainContainer containerHomeHeader" style="position: fixed; width: 100%;    z-index: 1;">
+	<h3 class="containerHomeHeaderheadings">
+		<a  ng-click="redirect()" class="HomeIconForStore"><i class="fa fa-home" aria-hidden="true" style="margin-left: 7%"></i></a>
+	</h3>
+	<h4 class="containerHomeHeaderheadings containerHomeHeaderheadingsFont"><a  ng-click="redirect()" class=" HomeIconForStore">Home</a>&nbsp;&nbsp;></h4>
+	<h5 class="containerHomeHeaderheadings containerMiniHeaderheadingsFont">Incident Management </h5>
+</div>
+<!-- <br><br><br>// commented by me on 27/02/2019 -->
+<div class="ContentMainContainer">
+	<div class="custom_tab">
+		<div class="tab_heading" style=" border-bottom: 1px solid #016840;">
+			<ul >
+			<li class="active">
+					<a href tabindex="3" class="incidentTabsIndex">Incident Management</a>
+			</li>			
+		</ul>
+		</div>
+		
+		<div class="containerNotRequired">
+			<div class="tab_panelNotRequired">				
+				<div class="filter-frequency">
+					<div class="filter-block1">
+
+					 <div class="form-field mr10 dropDownWidthIn">
+							<label class="select_label"><span>Status</span></label>
+							<select class="select-field h56 incidentTabsIndex" ng-model="status" tabindex="4">
+							<option value="" selected="selected">Please Select</option>
+								 <option >Active</option>
+								 <option>Inactive</option>
+							</select>
+					 </div>
+					 
+					 <div class="spinner-overlay" ng-show="loaderIncidentMgmtView"
+							style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+							</div>
+						</div>
+ 
+					 
+					 <div class="form-field mr10 submiticon">
+						<button tabindex="5" class="btn btn-field btn-green iconcolor incidentTabsIndex" title="Go" ng-click="getAllincidentTypeFromStatus(status);removeInputIncidentValue()"  ng-keydown="$event.keyCode === 13" data-toggle="tooltip" >
+						Submit
+						</button>
+					 </div>
+
+					 <div class="form-field mr10 submiticon refreshButtonAlign" >
+						<img  src="/brta/app/ui/resources/images/refresh.png"  title="Reset" tabindex="6"  ng-click="resetFilter()" ng-keydown="$event.keyCode === 13 && resetFilter()" style="height: 94%;" class="refreshTooltip incidentTabsIndex" data-toggle="tooltip">
+					 </div>
+					 <div class="form-field mr0 pull-right" style="margin-top: 3%;" >
+						 <a class="reportwith" ng-click="incidentManagementPdf()" ng-keydown="$event.keyCode === 13 && incidentManagementPdf()" >
+
+						 	<img src="/brta/app/ui/resources/images/new_pdf.png" title="Download Pdf" tabindex="7" class="pdfTooltip incidentTabsIndex" data-toggle="tooltip">
+						 </a>
+						 						 <a excel-export export-data="exportIncidentData" file-name="{{incidentfileName}}" class="reportwith incidentTabsIndex form-btn" id="incidentExcelData"  ng-if="exportIncidentData!=undefined && exportIncidentData.length>0"  ng-keydown="$event.keyCode === 13 && executeExcel_incident()" tabindex="8"></a>
+						 		<span >
+							<a    tabindex="8" title="Download Excel" data-toggle="tooltip"  ng-if="!(exportIncidentData!=undefined && exportIncidentData.length>0)"  class="form-btn incidentTabsIndex reportwith" id="emptyExcelIcon"
+								> <img
+								src="/brta/app/ui/resources/images/new_excel.png" >
+							</a>
+							</span>
+						 <!-- <span title="Download Excel" data-toggle="tooltip">
+						<a class="reportwith" tabindex="8" ng-if="jsonForIncidentExport!=undefined && jsonForIncidentExport.length>0" class="form-btn"
+								ng-csv="jsonForIncidentExport"
+								csv-header="['Incident','Status']"
+								filename="Incident Management.csv"  ng-keydown="$event.keyCode === 13 && executeExcel_incident()" id="incidentExcelData"> <img
+								src="/brta/app/ui/resources/images/new_excel.png" >
+							</a>
+							</span>	
+							<span title="Download Excel" data-toggle="tooltip">
+							<a  class="reportwith"  tabindex="8"  ng-if="!(jsonForIncidentExport!=undefined && jsonForIncidentExport.length>0)"  class="form-btn"
+								> <img
+								src="/brta/app/ui/resources/images/new_excel.png" >
+							</a>
+							</span>	 -->							
+						</div> 
+					</div>
+				</div>
+				<div class="filter-block">
+					<div class="form-inline">
+						<button type="button" tabindex="9" class="btn btn_green incidentTabsIndex" ng-click = "addIncident();removeTabIndex()" ng-show=" isSupplierRole ? '' : 'true' " title="Add New Incident" data-toggle="tooltip" >
+						<i class="fa fa-plus" aria-hidden="true"></i>
+						Add New Incident</button>
+					</div>
+				</div>
+					
+					<!--by deepak-->
+					
+					<div class="custom_table scroll-table table-scroll" ng-if="authorizedIncMgmt">
+					<table id="IncidentRecords"  dt-instance="dtInstance" 
+						datatable="" dt-options="dtOptionsIncMgmt"  dt-columns="dtColumnsIncMgmt" class="datatable resource-table" cellspacing="0" width="100%" style="margin-top: 0px; margin-bottom: 0px;">
+						</table>
+					</div>	
+					<div class="custom_table incpic scroll-table table-scroll table-responsive" ng-if="!authorizedIncMgmt">
+			
+					<table id="IncidentRecordsEmpty" ng-if="!authorizedIncMgmt" datatable=""  dt-options="IncidenetOptionRecords"  dt-columns="resDtColumnIncidentList" dt-instance="dtInstance" 
+						class="datatable resource-table" cellspacing="0" width="100%" ng-init="addTabIndex()">
+						<thead>
+							<tr>
+								<th>Incident</th>
+								<th>Status </th>
+								<th>Edit</th>
+								
+								
+							</tr>
+						</thead>
+
+					
+					</table>
+
+
+				</div>		
+				
+					<!--by deepak-->
+					
+				</div>
+				
+				<!--Inc popup-->
+				
+				<!--popup usermanagement-->
+		
+			<div class="set-data-popup popup_overlay fadein"
+			ng-show="addEditIncidentPopup===true">
+
+			<div class="popup_content setdata-scroll" style="height:auto;width:50%">
+				<div class="popup-header">
+					<button type="button" class="close close_Button"
+						ng-click="incMgmtPopupClose();assignTabIndexclose();assignbackIndexValue();assignTabIndexclose()" >
+						<img src="/brta/app/ui/resources/images/close_btn.png" tabindex="40">
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						<b>{{isEdit?"Edit":"Add"}} Incident</b>
+						<span
+													ng-if="!incDuplicate"
+													ng-show="incMgmt.error.incDuplicateError"
+													style="color: red; font-style: italic; font-size: 15px;">*Incident already exist </span>
+					</h4>
+					
+				</div>
+				<div class="popup-body ">
+					<div class="scroll-popup">
+						<div class="container containerWithoudPadding" tabindex="">
+							<div class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer"
+									style="padding: 0px 15px">
+									<div class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Incident Name*</b><span
+													ng-if="!incMgmt.incidentDescription"
+													ng-show="incMgmt.error.incidentNameError"
+													style="color: red;">Incident Name is mandatory. </span>
+											</h5>
+											<div class=" commentAlignment">
+
+												<input type="text" id="incName" limit-to="30" maxlength="30"
+													class="form-control addDriverIndexValue4 Inputwidth input-field bordercolorG ng-pristine ng-valid ng-not-empty ng-valid-maxlength ng-touched "
+													 ng-pattern-restrict="^[A-Za-z0-9 ]*$"
+													ng-model="incMgmt.incidentDescription" placeholder="Incident Name">
+											</div>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+						
+						<div class="container containerWithoudPadding">
+							<div class="col-md-6 col-lg-6 popupHeaderDate popupLayerWithoutPadding">
+								<div class="popup-layer "
+									style="padding: 0px 15px;">
+									<div class="select-drive-name checkbox-position border-removesuppliersite">
+										<div class="inner-content box-align-provider">
+											<h5 class="popUpHeadingh6">
+												<b>Status*</b><span
+											ng-if="!incMgmt.incStatus"
+											ng-show="incMgmt.error.incStatusError" 
+											style="color: red;"> Status is mandatory. </span> </b>
+																							
+											</h5>
+											
+											<div class="select-field serviceprovider-multifilter">
+												<ui-select ng-model="incMgmt.incStatus" class="addDriverIndexValue4" 
+													ng-disabled="isSupplierRole" search-enabled="false"
+													theme="bootstrap">
+													
+													<ui-select-match placeholder="Select ">{{$select.selected}}</ui-select-match>
+												<ui-select-choices repeat="incStatus in incStatus" class="flexcroll" style=" width: 60% !important;">
+												
+												<div>{{incStatus}}
+												</div>
+												<label for="incStatus{{$index}}"></label> </ui-select-choices> </ui-select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- loader-->
+
+							<div class="spinner-overlay" ng-show="loadertest"
+								style="padding-bottom: 20px">
+								<div class="loader-inner">
+									<i class="fa fa-spin fa-circle-o-notch"></i> Please wait...
+
+								</div>
+							</div>
+
+							<!-- loader-->
+
+
+							
+						</div>
+						
+
+						
+						<!--sTATUS fILETER-->
+						
+						
+						<div class="container containerWithoudPadding">
+						<div class="popup-footer">
+							<div class="popup-layer pull-left borderbottomremv"></div>
+						
+							<button type="button"
+								class="addDriverIndexValue5 btn btn-widthfrequency btn-edit freqicon pad-frequtopbottom saveButtonAlign"
+								ng-click="addEditIncDetails(incMgmt);assignTabIndexclose()">
+									Save</button>
+								
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+		
+		
+		
+		
+		</div>
+				
+				
+				
+				
+				
+		<!--end-->		
+				
+			</div>
+		</div>
+	</div>
+
+
+
+<script type="text/ng-template" id="warning-dialog.html">
+  <div class="modal-header">
+   <h3>Your session has been expired! Please login again.</h3>
+  </div>
+  <div idle-countdown="countdown" ng-init="countdown=5" class="modal-body">
+   <uib-progressbar max="5" value="5" animate="false" class="progress-striped active">You'll be logged out in {{countdown}} second(s).</uib-progressbar>
+  </div>
+
+</script>
+<script type="text/ng-template" id="timedout-dialog.html">
+  <div class="modal-header">
+   <h3>You've Timed Out! Please login again.</h3>
+  </div>
+  <div ng-if="!isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logout"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+
+ <div ng-if="isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logoutSupplier"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+ 
+
+</script>

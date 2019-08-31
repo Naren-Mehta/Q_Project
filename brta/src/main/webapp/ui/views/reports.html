@@ -1,0 +1,456 @@
+
+<style type="text/css">
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+	.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover
+	{
+	background: #7AB708;
+}
+.no-footer.dataTables_wrapper div.dataTables_scrollHead table, .no-footer.dataTables_wrapper div.dataTables_scrollBody table{
+	margin :0;
+}
+.dataTables_wrapper .dataTables_paginate {
+	margin-top: 3%;
+}
+.custom_table th {
+	line-height: 1%;
+}
+table.dataTable tbody td {
+    padding: 8px !important;
+}
+</style>
+
+<div class="background-static"></div>
+<div class="ContentMainContainer containerHomeHeader" style="position: fixed; width: 100%;    z-index: 1;">
+	<h3 class="containerHomeHeaderheadings">
+		<a ng-click="redirect()" class="HomeIconForStore"><i
+			class="fa fa-home" aria-hidden="true" style="margin-left: 7%;"></i></a>
+	</h3>
+	<h4 class="containerHomeHeaderheadings containerHomeHeaderheadingsFont">
+		<a ng-click="redirect()" class=" HomeIconForStore">Home</a>&nbsp;&nbsp;>
+	</h4>
+	<h5 class="containerHomeHeaderheadings containerMiniHeaderheadingsFont">Reports</h5>
+	
+</div>
+<!-- <br><br><br>// commented by me on 27/02/2019 -->
+<div class="ContentMainContainer">
+	<div class="custom_tab">
+
+		<div class="tab_heading">
+			<ul>
+				<li   ng-class="{active: $route.current.activetab == 'detailedActivityReportTab'}" ng-if="!isSupplierRole"><a tabindex="3" href="#/reports" 
+					ng-click="detailedActivityReportTab=true;incidentReportTab=false;pendingStoreReportTab=false;rmtReportTab=false;detailedActtivityReportManagementOpen()">DETAILED
+						ACTIVITY REPORT</a></li>
+
+				<li   ng-class="{active: $route.current.activetab == 'detailedActivityReportTab'}" ng-if="isSupplierRole"><a tabindex="3" href="#/reportsForSupplier"
+					ng-click="detailedActivityReportTab=true;incidentReportTab=false;pendingStoreReportTab=false;rmtReportTab=false;detailedActtivityReportManagementOpen()">DETAILED
+						ACTIVITY REPORT</a></li>
+
+				<li ng-class="{active: $route.current.activetab == 'rmtReportTab'}"><a tabindex="4" href="#/rmtReportTab"
+					ng-click="rmtReportTab=true;detailedActivityReportTab=false;pendingStoreReportTab=false;rmtImportReportManagementOpen()"
+					ng-show="user.role!='Supplier'">RMT IMPORT REPORT</a></li>
+			</ul>
+		</div>
+
+		<div class="containerNotRequired">
+			<div class="tab_panelNotRequired" ng-show="detailedActivityReportTab">
+				<div class="filter-frequency">
+					<div class="filter-block1">
+
+
+						<div class="form-field mr10 dropDownWidthOut">
+							<label class="select_label"><span> Buy Customer</span></label> <select tabindex="5"
+								class="select-field h56" ng-model="buyCustomerSelected"
+								ng-change="getFilteredValues(buyCustomerSelected,sellCustomerSelected,supplierSelected)"
+								style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="customer in buyCustomers | orderBy: 'customerName'" value='{{customer}}'>{{customer.customerName}}</option>
+							</select>
+						</div>
+						<div class="form-field mr10 dropDownWidthOut"
+							style="max-width: 27%;">
+							<label class="select_label"><span> Sell Customer</span></label> <select tabindex="6"
+								class="select-field h56" ng-model="sellCustomerSelected"
+								ng-change="getFilteredValues(buyCustomerSelected,sellCustomerSelected,supplierSelected)"
+								style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="sellCustomer in sellCustomersForCustomerSelected | orderBy: 'customerName'" value='{{sellCustomer}}'>{{sellCustomer.customerName}}</option>
+							</select>
+						</div>
+
+
+						<div class="spinner-overlay" ng-show="loaderDetailedReport"
+							style="padding-bottom: 20px">
+							<div class="loader-inner">
+								<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+							</div>
+						</div>
+
+
+						<div class="form-field mr10 dropDownWidthOut">
+							<label class="select_label"><span> Supplier</span></label> </span> <select tabindex="7"
+								class="select-field h56" ng-model="supplierSelected"
+								ng-change="getFilteredValues(buyCustomerSelected,sellCustomerSelected,supplierSelected)"
+								ng-disabled="isSupplierRole"
+								style="width: 100%;">
+								<option value="">Please Select</option>
+								<option ng-repeat="supplier in suppliersForCustomerSelected | orderBy: 'description'" value='{{supplier}}'>{{supplier.description}}</option>
+							</select>
+						</div>
+
+						<div class="form-field mr10 dropDownWidthOut"
+							style="max-width: 24%;">
+							<label class="select_label"><span> Incident Type</span></label> <select tabindex="8"
+								class="select-field h56" ng-model="incidentSelected"
+								ng-options="incident.incidentDescription for incident in incidentTypes | orderBy : 'incidentDescription'"
+								style="width: 100%; padding: 1%;">
+								<option value="">Please Select</option>
+							</select>
+						</div>
+						</div>
+					<div class="filter-block1">
+						<div class="form-field mr10 dateDropdownIn" >
+							<label class="select_label"><span>Start Date*</span>
+							<span ng-if="invalidDARStartDateError" style="color:red">{{invalidDARStartDateError}}</span>
+							</label>
+							<div class="input-group date-field"
+								ng-click="StartupDateDARFun();StartupDateDARFun_tabindex()" ng-keydown="$event.keyCode === 13 && StartupDateDARFun();StartupDateDARFun_tabindex()">
+								<input ng-paste="$event.preventDefault()" type="text" tabindex="9" id="startDARDate_popup"
+									ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									ng-model="startDARDate"
+									class="StartupDateDARFun_tabindex1 StartupDateDARFun_value input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="StartDateDAR.opened"
+									show-button-bar="false"
+									ng-keydown="$event.keyCode === 13 && StartupDateDARFun();StartupDateDARFun_tabindex()"
+									datepicker-options="startDateOptionsDAR" close-text="Close"
+									ng-click="StartupDateDARFun();StartupDateDARFun_tabindex()"
+									ng-change="checkSubmitBtn(); dateValidation()" ng-blur="checkValidDate();detailActivityfutureDate()"> <i
+									class="dte-icon glyphicon glyphicon-calendar"
+									style="color: green; font-size: 25px;"></i>
+							</div>
+						</div>
+
+
+
+						<div class="form-field mr10 dateDropdownIn" style="width:17%">
+							<label class="select_label"><span>End Date* </span>
+							<span ng-if="invalidDAREndDateError" style="color:red">{{invalidDAREndDateError}}</span>
+							</label>
+							<div class="input-group date-field" ng-click="EndDateDARFun();endDateDARFun_tabindex()" ng-keydown="$event.keyCode === 13 && EndDateDARFun();endDateDARFun_tabindex()">
+
+								<input ng-paste="$event.preventDefault()" type="text" ng-model="endDARDate" tabindex="10"
+									ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+									id="endDARDate_popup"
+									ng-keydown="$event.keyCode === 13 && EndDateDARFun();endDateDARFun_tabindex()"
+									class="endDateDARFun_tabindex1 StartupDateDARFun_tabindex1 input-field ng-pristine ng-valid ng-isolate-scope ng-empty ng-valid-date ng-touched"
+									placeholder="MM-DD-YYYY" datepicker-append-to-body="true"
+									uib-datepicker-popup="MM-dd-yyyy" is-open="EndDARDate.opened"
+									show-button-bar="false" datepicker-options="endDateOptionsDAR"
+									close-text="Close" ng-click="EndDateDARFun();endDateDARFun_tabindex()"
+									ng-change="checkSubmitBtn(); dateValidation()" ng-blur="checkValidDate();detailActivityTofutureDate()"> <i
+									class="dte-icon glyphicon glyphicon-calendar"
+									style="color: green; font-size: 25px;"></i>
+							</div>
+						</div>
+
+						<div class="form-field mr10 submiticon">
+							<button class="endDateDARFun_tabindex1 StartupDateDARFun_tabindex1 btn btn-field btn-green iconcolor" tabindex="11"
+								ng-disabled="disableSubmitBtn;" title="Go"
+								ng-click="getAllPickupsForDAR(buyCustomerSelected,sellCustomerSelected,supplierSelected,incidentSelected,startDARDate,endDARDate);removeInputValueDetailActivity()" ng-keydown="$event.keyCode === 13" data-toggle="tooltip">
+								Submit</button>
+						</div>
+						<div class="form-field mr10 submiticon refreshButtonAlign" >
+							<img src="/brta/app/ui/resources/images/refresh.png" tabindex="12" class="StartupDateDARFun_tabindex1 endDateDARFun_tabindex1" 
+								ng-disabled="disableSubmitBtn" title="Reset"
+								ng-click="resetDetailedActivityReport()" ng-keydown="$event.keyCode === 13 && resetDetailedActivityReport()" style="height: 94%;"  data-toggle="tooltip" >
+						</div>
+
+ 
+
+						<div class="form-field mr0 pull-right" style="margin-top: 3%;">
+							<a class="reportwith" ng-click="detailedActivityReportPdf()" ng-keydown="$event.keyCode === 13 && detailedActivityReportPdf()" >
+
+								<img src="/brta/app/ui/resources/images/new_pdf.png"
+								title="Download Pdf" class="pdfTooltip StartupDateDARFun_tabindex1 endDateDARFun_tabindex1" tabindex="13" data-toggle="tooltip">
+							</a>
+							<a excel-export export-data="exportDetailedActivityData" file-name="{{fileNameDetailActivity}}" class="reportwith" class="form-btn " id="idetailedactivityExcelData"  ng-keydown="$event.keyCode === 13 && executeExcel_detailedActivity()" ng-if="exportDetailedActivityData!=undefined && exportDetailedActivityData.length>0"></a>
+
+							<span title="Download Excel" data-toggle="tooltip">
+							 <a class="reportwith StartupDateDARFun_tabindex1 endDateDARFun_tabindex1"  tabindex="14"
+								ng-if="!(exportDetailedActivityData!=undefined && exportDetailedActivityData.length>0)"
+								class="form-btn" > <img
+								src="/brta/app/ui/resources/images/new_excel.png"
+								>
+							</a>
+						</span>
+							<!-- <span title="Download Excel" data-toggle="tooltip">
+							<a class="reportwith" tabindex="0"
+								ng-show="jsonForDAReportExport!=undefined && jsonForDAReportExport.length>0"
+								class="form-btn StartupDateDARFun_tabindex1 endDateDARFun_tabindex1" 
+								ng-csv="jsonForDAReportExport"
+								csv-header="['Buy Customer','Store Name','Pickup Date','Sell Customer','Sell Customer Site','Delivery Date','Material Profile',
+								'Bales Picked','Bales Remaining','Incident Type','Incident Picture','Driver Name']"
+								filename="Detailed Activity Report.csv"  ng-keydown="$event.keyCode === 13 && executeExcel_detailedActivity()" id="idetailedactivityExcelData"> <img
+								src="/brta/app/ui/resources/images/new_excel.png"
+								>
+							</a>
+							</span>
+							<span title="Download Excel" data-toggle="tooltip">
+							 <a class="reportwith StartupDateDARFun_tabindex1 endDateDARFun_tabindex1"  tabindex="14"
+								ng-show="!(jsonForDAReportExport!=undefined && jsonForDAReportExport.length>0)"
+								class="form-btn" > <img
+								src="/brta/app/ui/resources/images/new_excel.png"
+								>
+							</a>
+						</span> -->
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="custom_table scroll-table table-scroll" ng-if="authorized">
+					<table id="detailedActivityReportDataTable"  dt-instance="dtInstance" 
+						datatable="" dt-options="dtOptions"  dt-columns="dtColumns" class="datatable resource-table" cellspacing="0" width="100%" style="margin-top: 0px; margin-bottom: 0px;">
+						</table>
+					</div>	
+					<div class="custom_table scroll-table table-scroll" ng-if="!authorized" >
+						<table cellspacing="0"  id="detailedActivityReportDataTableEmpty" 
+						class="datatable resource-table" cellspacing="0" width="100%"  dt-instance="" 
+						datatable="" dt-options="dtOptionsEmptyTable"  dt-columns="">
+						<thead>
+							<tr class="table_form form-field nowrap">
+								<th class="tr_width">Buy <span class="tableWrapping">Customer</span></th>
+								<th class="tr_width" >Store <span class="tableWrapping">Name</span></th>
+								<th class="tr_width">Pickup <span class="tableWrapping">Date</span></th>
+								<th class="tr_width">Sell <span class="tableWrapping">Customer</span></th>
+								<th class="tr_width">Sell <span class="tableWrapping">Customer</span><span class="tableWrapping"> Site</span> </th>
+								<th class="tr_width">Delivery <span class="tableWrapping"> Date </span></th>
+
+								<th class="tr_width">Material <span class="tableWrapping">Profile</span></th>
+								<th class="tr_width">Bales <span class="tableWrapping">Picked<span></th>
+								<th class="tr_width">Bales <span class="tableWrapping">Remaining</span></th>
+								<th class="tr_width">Incident <span class="tableWrapping">Type</span></th>
+								
+								<th class="tr_width" style="width:150px !important">Incident<span class="tableWrapping"> Picture</span></th>
+								<th class="tr_width">Driver <span class="tableWrapping">Name</span></th>
+							</tr>
+						</thead>
+						</table>
+					
+				</div>
+
+
+			</div>
+
+		</div>
+	</div>
+
+	<div class="tab_panelNotRequired"
+		ng-show="rmtReportTab && !$scope.isSupplierRole"
+		style="padding-bottom: 20px">
+		<div class="filter-frequency">
+			<div class="filter-block1">
+
+
+				<div class="form-field mr10 dropDownWidthOut">
+					<label class="select_label"><span> Buy Customer </label> <select tabindex="5"
+						class="select-field h56 " ng-model="buyCustomerSelectedRMT"
+						ng-change="getFilteredValuesRMT(buyCustomerSelectedRMT,sellCustomerSelectedRMT)" style="width: 100%;">
+						<option value="">Please Select</option>
+							<option ng-repeat="customer in buyCustomers | orderBy: 'customerName'" value='{{customer}}'>{{customer.customerName}}</option>
+							</select>
+						
+				</div>
+				
+			
+
+				<div class="form-field mr10 dropDownWidthOut">
+					<label class="select_label"><span> Sell Customer</span></label> <select tabindex="6"
+						class="select-field h56" ng-model="sellCustomerSelectedRMT"
+						ng-change="getFilteredValuesRMT(buyCustomerSelectedRMT,sellCustomerSelectedRMT)" style="width: 100%;">
+						<option value="">Please Select</option>
+								<option ng-repeat="sellCustomer in sellCustomersForCustomerSelected | orderBy: 'customerName'" value='{{sellCustomer}}'>{{sellCustomer.customerName}}</option>
+							</select>
+						</div>
+				
+
+
+
+
+				<div class="form-field mr10 dateDropdownIn ">
+					<label class="select_label"><span>Start Date*</span>
+					<span ng-if="invalidRMTStartDateError" style="color:red">{{invalidRMTStartDateError}}</span>
+					</label>
+					<div class="input-group date-field" ng-click="StartDateFunRMT();StartDateFunRMT_tabindex()" ng-keydown="$event.keyCode === 13 && StartDateFunRMT();StartDateFunRMT_tabindex()">
+
+						<input ng-paste="$event.preventDefault()" type="text" ng-model="startDateRMT" tabindex="7"
+							ng-keydown="$event.keyCode === 13 && StartDateFunRMT();StartDateFunRMT_tabindex()"
+							id="startDateRMT_popup"
+							ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+							class="StartDateFunRMT_tabindex1 startDateFunRMT_value input-field" placeholder="MM-DD-YYYY"
+							datepicker-append-to-body="true"
+							uib-datepicker-popup="MM-dd-yyyy" is-open="StartDateRMT.opened"
+							show-button-bar="false" datepicker-options="startDateOptionsRMT"
+							close-text="Close" ng-click="StartDateFunRMT(); dateValidation();StartDateFunRMT_tabindex()"
+							ng-change="checkSubmitBtn();dateValidation()" ng-blur="checkValidDate();rmtfutureDate()"> <i
+							class="date-icon glyphicon glyphicon-calendar assigningIconStyle"></i>
+					</div>
+				</div>
+				<div class="spinner-overlay" ng-show="loaderRmtReport"
+					style="padding-bottom: 20px">
+					<div class="loader-inner">
+						<i class="fa fa-spin fa-circle-o-notch"></i> Loading ...
+					</div>
+				</div>
+
+
+				<div class="form-field mr10 dateDropdownIn ">
+					<label class="select_label"><span>End Date*</span>
+					<span ng-if="invalidRMTEndDateError" style="color:red">{{invalidRMTEndDateError}}</span>
+					</label>
+					<div class="input-group date-field" ng-click="EndDateFunRMT();endDateFunRMT_tabindex()" ng-keydown="$event.keyCode === 13 && EndDateFunRMT();endDateFunRMT_tabindex()">
+
+						<input type="text" ng-model="endDateRMT" tabindex="8" ng-paste="$event.preventDefault()"
+							id="endDateRMT_popup"
+							ng-keydown="$event.keyCode === 13 && EndDateFunRMT();endDateFunRMT_tabindex()"
+							ng-pattern-restrict="^\d{0,2}(-\d{0,2}(-\d{0,4})?)?$"
+							class="StartDateFunRMT_tabindex1 endDateFunRMT_tabindex1 input-field" placeholder="MM-DD-YYYY"
+							datepicker-append-to-body="true"
+							uib-datepicker-popup="MM-dd-yyyy" is-open="EndDateRMT.opened"
+							show-button-bar="false" datepicker-options="endDateOptionsRMT"
+							close-text="Close" ng-click="EndDateFunRMT();endDateFunRMT_tabindex()"
+							ng-change="checkSubmitBtn();dateValidation()"  ng-blur="checkValidDate();rmtfutureToDate()"> <i
+							class="date-icon glyphicon glyphicon-calendar assigningIconStyle"></i>
+					</div>
+				</div>
+
+
+
+				<div class="form-field mr10 submiticon">
+					<button class="StartDateFunRMT_tabindex1 endDateFunRMT_tabindex1 btn btn-field btn-green iconcolor" title="Go" tabindex="9"
+						ng-disabled="disableSubmitBtnRMT"
+						ng-click="getBalePickupsRMT(buyCustomerSelectedRMT,sellCustomerSelectedRMT, startDateRMT, endDateRMT);removeInputValueRMTimport()" ng-keydown="$event.keyCode === 13" data-toggle="tooltip">
+						Submit</button>
+				</div>
+				<div class="form-field mr10 submiticon refreshButtonAlign" >
+					<img src="/brta/app/ui/resources/images/refresh.png" tabindex="10" class="StartDateFunRMT_tabindex1 endDateFunRMT_tabindex1" data-toggle="tooltip"
+						ng-disabled="disableSubmitBtnRMT" ng-click="resetFiltersRMT()"
+						style="height: 94%;" title="Reset" ng-keydown="$event.keyCode === 13 && resetFiltersRMT()">
+				</div>
+
+
+
+
+
+				 <div class="form-field mr0 pull-right" style="margin-top: 3%;">
+					<a class="reportwith " ng-click="downloadRMTPdf()"  ng-keydown="$event.keyCode === 13 && downloadRMTPdf()"> <img
+						src="/brta/app/ui/resources/images/new_pdf.png"
+						title="Download Pdf" class="pdfTooltip StartDateFunRMT_tabindex1 endDateFunRMT_tabindex1" tabindex="11" data-toggle="tooltip">
+					</a>
+					<a excel-export export-data="exportRMTReportData" file-name="{{fileNameRMTReport}}" class="reportwith" class="form-btn " id="rmtimportExcelData"  ng-keydown="$event.keyCode === 13 && executeExcel_rmtimport()" ng-if="exportRMTReportData!=undefined && exportRMTReportData.length>0"></a>
+
+					<span title="Download Excel" data-toggle="tooltip">
+					<a class="reportwith StartDateFunRMT_tabindex1 endDateFunRMT_tabindex1"  tabindex="12"
+						ng-if="!(exportRMTReportData!=undefined && exportRMTReportData.length>0)"
+						class="form-btn" > <img
+						src="/brta/app/ui/resources/images/new_excel.png">
+					</a>
+				</span>
+
+					<!-- <span title="Download Excel" data-toggle="tooltip">
+					 <a class="reportwith StartDateFunRMT_tabindex1 endDateFunRMT_tabindex1" tabindex="0"
+						ng-show="jsonForRMTReportExport!=undefined && jsonForRMTReportExport.length>0"
+						class="form-btn" 
+						ng-csv="jsonForRMTReportExport"
+						csv-header="['Date','Vendor Code','Customer Code','Material Code','Release No','Reference',
+								'Notes','Weight','Ex. Rebate','Ex. Sale','Ex. Cost','Bales','Bales Remaining','Destination Weight']"
+						filename="RMT Import Report.csv" ng-keydown="$event.keyCode === 13 && executeExcel_rmtimport()" id="rmtimportExcelData">
+						 <img	src="/brta/app/ui/resources/images/new_excel.png">
+					</a> 
+				</span>
+				<span title="Download Excel" data-toggle="tooltip">
+					<a class="reportwith StartDateFunRMT_tabindex1 endDateFunRMT_tabindex1"  tabindex="12"
+						ng-show="!(jsonForRMTReportExport!=undefined && jsonForRMTReportExport.length>0)"
+						class="form-btn" > <img
+						src="/brta/app/ui/resources/images/new_excel.png">
+					</a>
+				</span> -->
+
+				</div> 
+			</div>
+		</div>
+
+
+
+		<div class="custom_table scroll-table table-scroll"  ng-if="authorizedRMT" >
+	 <table id="rmtImportReportDataTable" dt-instance="dtInstance"
+						 datatable="" dt-options="dtOptionsRMT"
+						 dt-columns="dtColumnsRMT" 
+						class="datatable resource-table" cellspacing="0" width="100%" style="margin-top: 0px; margin-bottom: 0px;"> 
+						</table> 
+			</div>
+			<div class="custom_table scroll-table table-scroll"  ng-if="!authorizedRMT"   >
+			
+			<table id="rmtImportReportDataTable"   class="datatable resource-table" cellspacing="0" width="100%"  style="margin-top: 0px; margin-bottom: 0px;" dt-instance=""
+						 datatable="" dt-options="dtOptionsRMTEmptyTable"
+						 dt-columns="" >
+				<thead>
+					<tr class="table_form form-field nowrap">
+
+						<th class="tr_width">Pickup Date</th>
+						<th class="tr_width">Buy Customer<span class="tableWrapping">
+								Site </span></th>
+						<th class="tr_width">Sell Customer Site</th>
+						<th class="tr_width">Material <span class="tableWrapping">Profile</span>
+						</th>
+						<th class="tr_width">Reference</th>
+						<th class="tr_width">Weight</th>
+						<th class="tr_width">Bales <span class="tableWrapping">Picked</span></th>
+						<th class="tr_width">Bales <span class="tableWrapping">Remaining</span></th>
+						<th class="tr_width">Release #</th>
+						<th class="tr_width">Destination <span class="tableWrapping">Weight</span></th>
+
+					</tr>
+				</thead>
+				
+			</table>
+		</div>
+
+
+
+
+	</div>
+
+</div>
+
+
+
+
+<script type="text/ng-template" id="warning-dialog.html">
+  <div class="modal-header">
+   <h3>Your session has been expired! Please login again.</h3>
+  </div>
+  <div idle-countdown="countdown" ng-init="countdown=5" class="modal-body">
+   <uib-progressbar max="5" value="5" animate="false" class="progress-striped active">You'll be logged out in {{countdown}} second(s).</uib-progressbar>
+  </div>
+
+</script>
+<script type="text/ng-template" id="timedout-dialog.html">
+  <div class="modal-header">
+   <h3>You've Timed Out! Please login again.</h3>
+  </div>
+  <div ng-show="!isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logout"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+
+ <div ng-show="isSupplierRole" class="modal-body" style="text-align:center">
+   <a href="logoutSupplier"  class="btn btn-primary">
+      Ok
+   </a>
+ </div>
+ 
+
+</script>
